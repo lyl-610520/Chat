@@ -10,117 +10,68 @@
     <style>
         /* --- 主题变量定义 --- */
         :root {
-            --bg-color: #f0f2f5;
-            --panel-bg: #ffffff;
-            --accent-color: #0084ff;
-            --text-color: #0d0d0d;
-            --secondary-text: #65676b;
-            --border-color: #ced0d4;
-            --my-message-bg: #0084ff;
-            --their-message-bg: #e4e6eb;
-            --bg-image: none;
-            --display-font: 'ZCOOL KuaiLe', cursive;
-            --border-radius-normal: 18px;
-            --border-radius-round: 25px;
+            --bg-color: #f0f2f5; --panel-bg: #ffffff; --accent-color: #0084ff; --text-color: #0d0d0d; --secondary-text: #65676b; --border-color: #ced0d4; --my-message-bg: #0084ff; --their-message-bg: #e4e6eb; --bg-image: none; --display-font: 'ZCOOL KuaiLe', cursive; --border-radius-normal: 18px;
         }
-
         body[data-theme='cat-theme'] {
-            --bg-color: #fdf5e6; /* 奶油白背景 */
-            --panel-bg: rgba(255, 255, 255, 0.8);
-            --accent-color: #ffcad4; /* 樱花粉主题色 */
-            --text-color: #5d5d5d;
-            --secondary-text: #a18cd1; /* 淡紫色次要文字 */
-            --border-color: #fbc2eb; /* 粉色边框 */
-            --my-message-bg: linear-gradient(to right, #ffcad4, #fbc2eb); /* 粉色渐变 */
-            --their-message-bg: #ffffff;
-            --bg-image: url('https://www.transparenttextures.com/patterns/az-subtle.png');
-            --border-radius-normal: 25px;
-            --border-radius-round: 30px;
+            --bg-color: #fff5f8; --panel-bg: rgba(255, 255, 255, 0.85); --accent-color: #ff85a2; --text-color: #4a4a4a; --secondary-text: #b5a5d8; --border-color: #ffc2d4; --my-message-bg: linear-gradient(135deg, #ff85a2, #ffb3c1); --their-message-bg: #ffffff; --bg-image: url('https://www.transparenttextures.com/patterns/subtle-pink-dots.png'); --border-radius-normal: 25px;
         }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0; display: flex; height: 100vh;
-            background-color: var(--bg-color); background-image: var(--bg-image);
-            overflow: hidden; transition: background-color 0.5s ease;
+        /* --- 基础与动画 --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; display: flex; height: 100vh; background-color: var(--bg-color); background-image: var(--bg-image); overflow: hidden; transition: background-color 0.5s ease; }
+        #chat-container { display: flex; width: 100%; height: 100%; }
+        @keyframes fall {
+            0% { top: -10%; opacity: 1; transform: translateX(0) rotate(0deg); }
+            100% { top: 110%; opacity: 0.8; transform: translateX(100px) rotate(360deg); }
         }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
-        #chat-container { display: flex; width: 100%; height: 100%; transition: all 0.3s ease; }
-
-        #sidebar {
-            width: 280px;
-            background-color: var(--panel-bg); backdrop-filter: blur(8px);
-            border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column;
-            padding: 20px; box-sizing: border-box;
-            transition: all 0.5s ease;
-            position: relative; /* 为了给猫咪定位 */
-        }
+        /* --- 花瓣飘落容器 --- */
+        #flower-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .flower { position: absolute; background-size: contain; background-repeat: no-repeat; background-image: url('https://api.iconify.design/emojione/fallen-leaf.svg?color=%23f8c5d8'); animation-name: fall; animation-timing-function: linear; animation-iteration-count: infinite; }
         
-        /* --- 新增：可爱的猫咪装饰 --- */
-        #sidebar::after {
-            content: '';
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 100px;
-            height: 100px;
-            background-image: url('https://api.iconify.design/fluent-emoji/cat-face.svg');
-            background-size: contain;
-            background-repeat: no-repeat;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            transform: rotate(-10deg);
-        }
-        body[data-theme='cat-theme'] #sidebar::after {
-            opacity: 0.7;
-        }
-
+        /* --- 侧边栏 (修复手机布局) --- */
+        #sidebar { width: 280px; background-color: var(--panel-bg); backdrop-filter: blur(10px); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; transition: all 0.5s ease; position: relative; }
+        #sidebar::after { content: ''; position: absolute; bottom: 10px; right: 10px; width: 80px; height: 80px; background-image: url('https://api.iconify.design/flat-color-icons/cat.svg'); background-size: contain; background-repeat: no-repeat; opacity: 0; transition: opacity 0.5s 0.2s ease; transform: rotate(-15deg); pointer-events: none; }
+        body[data-theme='cat-theme'] #sidebar::after { opacity: 0.9; }
         #sidebar h2 { margin: 0 0 20px 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
         #user-list { list-style-type: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
         #user-list li { padding: 10px; border-radius: 12px; margin-bottom: 5px; color: var(--secondary-text); font-weight: 500; }
-        #theme-switcher { margin-top: 20px; padding: 10px; border: 1px solid var(--border-color); background-color: transparent; color: var(--accent-color); border-radius: 12px; cursor: pointer; font-weight: bold; text-align: center; transition: all 0.3s ease; }
-        #theme-switcher:hover { background-color: var(--accent-color); color: white; }
+        #theme-switcher { margin-top: auto; /* 关键修复：将按钮推到底部 */ padding-top: 20px; border: none; background: transparent; color: var(--accent-color); cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; }
         
+        /* --- 聊天主窗口与背景元素 --- */
         #main-chat { flex-grow: 1; display: flex; flex-direction: column; background-color: transparent; position: relative; }
+        body[data-theme='cat-theme']::after { /* 大蛋糕背景 */ content: ''; position: fixed; bottom: -50px; right: -80px; width: 400px; height: 400px; background-image: url('https://www.freeiconspng.com/uploads/birthday-cake-icon-png-9.png'); background-size: contain; background-repeat: no-repeat; opacity: 0; transition: opacity 0.8s ease; z-index: -1; pointer-events: none; }
+        body[data-theme='cat-theme'] { opacity: 1; } /* 触发动画 */ body[data-theme='cat-theme']::after { opacity: 0.7; }
         
-        body[data-theme='cat-theme'] #main-chat::before {
-            content: '小陌陌生日快乐';
-            font-family: var(--display-font);
-            font-size: 8vw;
-            color: rgba(255, 192, 203, 0.25); /* 更柔和的粉色 */
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%) rotate(-5deg); /* 加一点旋转角度 */
-            z-index: 0; pointer-events: none;
-        }
+        #main-chat::before { /* 生日快乐文字 */ content: '小陌陌生日快乐'; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-8deg); z-index: 0; pointer-events: none; transition: color 0.8s ease; }
+        body[data-theme='cat-theme'] #main-chat::before { color: rgba(255, 192, 203, 0.2); }
         
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; position: relative; z-index: 1; }
-        #messages li { padding: 12px 18px; border-radius: var(--border-radius-normal); margin-bottom: 12px; max-width: 70%; line-height: 1.5; opacity: 0; transform: translateY(20px); animation: slideUp 0.4s forwards; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
-        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-        #messages li.my-message { background: var(--my-message-bg); color: white; margin-left: auto; text-align: right; }
+        #messages li { padding: 12px 18px; border-radius: var(--border-radius-normal); margin-bottom: 12px; max-width: 75%; line-height: 1.5; opacity: 0; transform: translateY(20px); animation: slideUp 0.4s forwards; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+        #messages li.my-message { background: var(--my-message-bg); color: #fff; margin-left: auto; text-align: right; }
         #messages li.their-message { background-color: var(--their-message-bg); color: var(--text-color); margin-right: auto; }
         #messages li.system-message { background: none; box-shadow: none; color: var(--secondary-text); font-style: italic; font-size: 0.9em; text-align: center; width: 100%; max-width: 100%; }
         .message-sender { font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--secondary-text); }
         .my-message .message-sender { display: none; }
         
-        #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); backdrop-filter: blur(8px); }
-        #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 10px 15px; flex-grow: 1; border-radius: var(--border-radius-round); margin-right: 10px; font-size: 1em; color: var(--text-color); }
+        #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); backdrop-filter: blur(10px); }
+        #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 10px 18px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
         #input:focus { outline: none; border-color: var(--accent-color); }
-        #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: var(--border-radius-round); cursor: pointer; font-size: 1em; transition: transform 0.2s ease; }
+        #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; transition: transform 0.2s ease; }
         #form button:active { transform: scale(0.95); }
 
-        /* ... (登录框和移动端样式基本不变) ... */
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 100; }
-        #login-box { background: var(--panel-bg); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        #login-box input { padding: 12px; font-size: 1.1em; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; }
-        #login-box button { padding: 12px 25px; font-size: 1.1em; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; }
-        @media (max-width: 768px) { #sidebar { position: fixed; left: 0; top: 0; height: 100%; z-index: 10; margin-left: -280px; } body.sidebar-open #sidebar { margin-left: 0; } body.sidebar-open #main-chat{ margin-left: 280px; } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; } }
-        @media (min-width: 769px) { #toggle-users { display: none; } }
+        #login-overlay, #login-box, @media (max-width: 768px), @media (min-width: 769px) { /* 省略未改变的样式 */ }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 100; } #login-box { background: var(--panel-bg); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); } #login-box input { padding: 12px; font-size: 1.1em; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; } #login-box button { padding: 12px 25px; font-size: 1.1em; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; } @media (max-width: 768px) { #sidebar { position: fixed; left: 0; top: 0; height: 100%; z-index: 10; margin-left: -280px; } body.sidebar-open #sidebar { margin-left: 0; } body.sidebar-open #main-chat{ margin-left: 280px; } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; } } @media (min-width: 769px) { #toggle-users { display: none; } }
     </style>
 </head>
 <body>
-    <!-- HTML 部分和 JS 部分与上一版完全相同，这里省略以保持简洁 -->
-    <!-- 请确保您是完整复制粘贴，不要只复制 <style> 部分 -->
+
+    <div id="flower-container"></div>
+    <div id="login-overlay">...</div> <!-- 省略登录框HTML -->
+    <div id="chat-container">...</div> <!-- 省略聊天框HTML -->
+    <button id="toggle-users">&#9776;</button>
+
+    <!-- 为了简洁，上面的HTML省略了，请确保您是完整复制粘贴下面的代码块 -->
 
     <div id="login-overlay">
         <div id="login-box">
@@ -135,7 +86,7 @@
         <div id="sidebar">
             <h2>Online Users</h2>
             <ul id="user-list"></ul>
-            <div id="theme-switcher">切换到 陌上悠桐（庆生版）</div>
+            <button id="theme-switcher">✨ 切换到 陌上悠桐（庆生版）</button>
         </div>
         <div id="main-chat">
             <ul id="messages"></ul>
@@ -145,12 +96,67 @@
         </div>
     </div>
     <button id="toggle-users">&#9776;</button>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // --- 原有聊天逻辑 (保持不变) ---
         const socket = io(); const loginForm = document.getElementById('login-form'); const nicknameInput = document.getElementById('nickname-input'); const loginOverlay = document.getElementById('login-overlay'); const form = document.getElementById('form'); const input = document.getElementById('input'); const messages = document.getElementById('messages'); const userList = document.getElementById('user-list'); const toggleButton = document.getElementById('toggle-users'); let myNickname = ''; loginForm.addEventListener('submit', (e) => { e.preventDefault(); if (nicknameInput.value) { myNickname = nicknameInput.value; socket.emit('new user', myNickname); loginOverlay.style.display = 'none'; input.focus(); } }); form.addEventListener('submit', (e) => { e.preventDefault(); if (input.value) { socket.emit('chat message', input.value); input.value = ''; } }); socket.on('chat message', (data) => { const item = document.createElement('li'); const sender = document.createElement('span'); sender.className = 'message-sender'; sender.textContent = data.username; item.textContent = data.msg; item.prepend(sender); if (data.username === myNickname) { item.classList.add('my-message'); } else { item.classList.add('their-message'); } messages.appendChild(item); messages.scrollTop = messages.scrollHeight; }); const showSystemMessage = (msg) => { const item = document.createElement('li'); item.textContent = msg; item.classList.add('system-message'); messages.appendChild(item); messages.scrollTop = messages.scrollHeight; }; socket.on('user joined', (username) => { showSystemMessage(`${username} has joined the chat.`); }); socket.on('user left', (username) => { if(username) showSystemMessage(`${username} has left the chat.`); }); socket.on('update user list', (users) => { userList.innerHTML = ''; users.forEach(user => { const item = document.createElement('li'); item.textContent = user; if (user === myNickname) { item.textContent += ' (You)'; item.style.fontWeight = 'bold'; } userList.appendChild(item); }); }); toggleButton.addEventListener('click', () => { document.body.classList.toggle('sidebar-open'); });
-        const themeSwitcher = document.getElementById('theme-switcher'); const themeOneName = "主题一"; const catThemeName = "陌上悠桐（庆生版）"; function applyTheme(theme) { if (theme === 'cat-theme') { document.body.dataset.theme = 'cat-theme'; themeSwitcher.textContent = `切换到 ${themeOneName}`; localStorage.setItem('chat_theme', 'cat-theme'); } else { document.body.dataset.theme = 'theme-one'; themeSwitcher.textContent = `切换到 ${catThemeName}`; localStorage.setItem('chat_theme', 'theme-one'); } }
-        themeSwitcher.addEventListener('click', () => { const currentTheme = document.body.dataset.theme; if (currentTheme === 'cat-theme') { applyTheme('theme-one'); } else { applyTheme('cat-theme'); } });
-        document.addEventListener('DOMContentLoaded', () => { const savedTheme = localStorage.getItem('chat_theme') || 'theme-one'; applyTheme(savedTheme); });
+        
+        // --- 全新升级：主题与动画逻辑 ---
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const flowerContainer = document.getElementById('flower-container');
+        const themeOneName = "主题一";
+        const catThemeName = "陌上悠桐（庆生版）";
+
+        // 功能：创建花瓣
+        function createFallingFlowers() {
+            flowerContainer.innerHTML = ''; // 清空旧花瓣
+            const numberOfFlowers = 20; // 屏幕上的花瓣数量
+            for (let i = 0; i < numberOfFlowers; i++) {
+                const flower = document.createElement('div');
+                flower.classList.add('flower');
+                
+                const size = Math.random() * 20 + 15; // 15px到35px
+                flower.style.width = `${size}px`;
+                flower.style.height = `${size}px`;
+                flower.style.left = `${Math.random() * 100}%`;
+                flower.style.animationDuration = `${Math.random() * 8 + 7}s`; // 7-15秒
+                flower.style.animationDelay = `${Math.random() * 10}s`; // 0-10秒延迟
+
+                flowerContainer.appendChild(flower);
+            }
+        }
+
+        // 功能：应用指定的主题
+        function applyTheme(theme) {
+            if (theme === 'cat-theme') {
+                document.body.dataset.theme = 'cat-theme';
+                themeSwitcher.innerHTML = `✨ 切换到 ${themeOneName}`;
+                localStorage.setItem('chat_theme', 'cat-theme');
+                createFallingFlowers(); // 创建花瓣！
+            } else {
+                document.body.dataset.theme = 'theme-one';
+                themeSwitcher.innerHTML = `✨ 切换到 ${catThemeName}`;
+                localStorage.setItem('chat_theme', 'theme-one');
+                flowerContainer.innerHTML = ''; // 清空花瓣
+            }
+        }
+
+        // 按钮点击事件
+        themeSwitcher.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('chat_theme') || 'theme-one';
+            if (currentTheme === 'cat-theme') {
+                applyTheme('theme-one');
+            } else {
+                applyTheme('cat-theme');
+            }
+        });
+
+        // 页面加载时，检查并应用保存过的主题
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('chat_theme') || 'theme-one';
+            applyTheme(savedTheme);
+        });
     </script>
 </body>
 </html>
