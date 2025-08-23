@@ -8,8 +8,9 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
-// 存储在线用户
-const users = {};
+// 存储在线用户，这次我们需要双向查找
+const usersBySocketId = {}; // 通过 socket.id 找 username
+const socketsByUsername = {}; // 通过 username 找 socket.id
 
 // 提供前端静态文件
 app.use(express.static('public'));
@@ -19,30 +20,50 @@ io.on('connection', (socket) => {
 
   // 监听新用户加入
   socket.on('new user', (username) => {
-    users[socket.id] = username;
-    // 广播新用户加入的消息
+    usersBySocketId[socket.id] = username;
+    socketsByUsername[username] = socket.id;
+    
     io.emit('user joined', username);
-    // 更新所有客户端的在线用户列表
-    io.emit('update user list', Object.values(users));
+    io.emit('update user list', Object.values(usersBySocketId));
   });
 
-  // 监听聊天消息
+  // 监听公共聊天消息
   socket.on('chat message', (msg) => {
-    const username = users[socket.id] || 'Anonymous';
-    // 广播消息给所有客户端
+    const username = usersBySocketId[socket.id] || 'Anonymous';
     io.emit('chat message', { username, msg });
+  });
+
+  // 【新增】监听私聊消息
+  socket.on('private message', (data) => {
+    const fromUser = usersBySocketId[socket.id];
+    const targetSocketId = socketsByUsername[data.to];
+
+    if (fromUser && targetSocketId) {
+      // 发送给目标用户
+      io.to(targetSocketId).emit('private message', {
+        from: fromUser,
+        to: data.to,
+        msg: data.msg
+      });
+      // 也发送给自己，让自己能看到已发送的私信
+      io.to(socket.id).emit('private message', {
+        from: fromUser,
+        to: data.to,
+        msg: data.msg
+      });
+    }
   });
 
   // 监听用户断开连接
   socket.on('disconnect', () => {
-    const username = users[socket.id];
+    const username = usersBySocketId[socket.id];
     if (username) {
       console.log('User disconnected:', username);
-      delete users[socket.id];
-      // 广播用户离开的消息
+      delete usersBySocketId[socket.id];
+      delete socketsByUsername[username];
+      
       io.emit('user left', username);
-      // 更新所有客户端的在线用户列表
-      io.emit('update user list', Object.values(users));
+      io.emit('update user list', Object.values(usersBySocketId));
     }
   });
 });
