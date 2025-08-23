@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat Room（桐儿生日）</title>
+    <title>Chat Room for Tong'er</title>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,92 +10,91 @@
         :root {
             --bg-color: #f0f2f5;
             --panel-bg: #ffffff;
-            --accent-color: #3399ff; /* 变浅的蓝色 */
+            --accent-color: #5dade2; /* 变浅的天蓝色 */
             --text-color: #0d0d0d;
             --secondary-text: #65676b;
             --border-color: #ced0d4;
-            --my-message-bg: #3399ff; /* 变浅的蓝色 */
+            --my-message-bg: #5dade2; /* 变浅的天蓝色 */
             --their-message-bg: #e4e6eb;
-            --bg-image: none;
-            --display-font: 'ZCOOL KuaiLe', cursive;
             --private-msg-bg: #fffbe6;
+            --display-font: 'ZCOOL KuaiLe', cursive;
         }
 
         body[data-theme='cat-theme'] {
             --bg-color: #fff5f8;
-            --panel-bg: rgba(255, 255, 255, 0.85);
+            --panel-bg: rgba(255, 255, 255, 0.88);
             --accent-color: #ff85a2;
             --text-color: #4a4a4a;
             --secondary-text: #b5a5d8;
             --border-color: #ffc2d4;
             --my-message-bg: linear-gradient(135deg, #ffacc7, #ffd1dc); /* 变浅的粉色渐变 */
             --their-message-bg: #ffffff;
-            --bg-image: url('https://www.transparenttextures.com/patterns/subtle-pink-dots.png');
             --private-msg-bg: #f0f8ff;
         }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; display: flex; height: 100vh; background-color: var(--bg-color); background-image: var(--bg-image); overflow: hidden; transition: background-color 0.5s ease; }
+        /* --- 基础与动画 --- */
+        html { height: 100%; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; display: flex; height: 100%; background-color: var(--bg-color); background-image: var(--bg-image); overflow: hidden; transition: background-color 0.5s ease; }
         #chat-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; }
-        
-        @keyframes fall { 0% { top: -10%; opacity: 1; } 100% { top: 110%; opacity: 0.5; transform: translateX(100px) rotate(360deg); } }
+        @keyframes fall { 0% { top: -10%; opacity: 1; transform: translateX(0) rotate(0deg); } 100% { top: 110%; opacity: 0.5; transform: translateX(100px) rotate(360deg); } }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-        
+
+        /* --- 动态元素 --- */
         #flower-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
         .flower { position: absolute; background-size: contain; background-repeat: no-repeat; background-image: url('https://api.iconify.design/vscode-icons/file-type-sakura.svg'); animation: fall linear infinite; }
-        
-        /* 侧边栏布局修复 */
-        #sidebar { width: 280px; background-color: var(--panel-bg); backdrop-filter: blur(10px); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; transition: all 0.5s ease; position: relative; }
-        #sidebar::after { content: ''; position: absolute; bottom: 10px; right: 10px; width: 80px; height: 80px; background-image: url('https://api.iconify.design/flat-color-icons/cat.svg'); background-size: contain; background-repeat: no-repeat; opacity: 0; transition: opacity 0.5s 0.2s ease; transform: rotate(-15deg); pointer-events: none; }
-        body[data-theme='cat-theme'] #sidebar::after { opacity: 0.9; }
-        #sidebar h2 { margin: 0 0 20px 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; flex-shrink: 0; }
-        #user-list { list-style-type: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
-        #user-list li { padding: 10px; border-radius: 12px; margin-bottom: 5px; color: var(--secondary-text); font-weight: 500; transition: background-color 0.2s; }
-        #user-list li.can-chat:hover { background-color: rgba(0,0,0,0.05); cursor: pointer; }
-        #theme-switcher { margin-top: auto; padding-top: 20px; border: none; background: transparent; color: var(--accent-color); cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; flex-shrink: 0; }
-        
-        #main-chat { flex-grow: 1; display: flex; flex-direction: column; background-color: transparent; position: relative; }
         
         body::after { content: ''; position: fixed; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; right: -80px; bottom: -50px; width: 400px; height: 400px; background-image: url('https://www.freeiconspng.com/uploads/birthday-cake-icon-png-9.png'); background-size: contain; background-repeat: no-repeat; }
         body[data-theme='cat-theme']::after { opacity: 0.7; }
 
-        #main-chat::before { content: '小陌陌生日快乐'; position: absolute; top: 50%; left: 50%; width: 100%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: 0; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; }
-        body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
+        /* --- 侧边栏完美布局 --- */
+        #sidebar { width: 280px; background-color: var(--panel-bg); backdrop-filter: blur(10px); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; transition: all 0.5s ease; position: relative; height: 100%; }
+        #sidebar h2 { margin: 0 0 20px 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; flex-shrink: 0; }
+        #user-list { list-style-type: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; -webkit-overflow-scrolling: touch; }
+        #user-list li { padding: 10px; border-radius: 12px; margin-bottom: 5px; color: var(--secondary-text); font-weight: 500; transition: background-color 0.2s; }
+        #user-list li.can-chat:hover { background-color: rgba(0,0,0,0.05); cursor: pointer; }
+        #sidebar::before { content: ''; position: absolute; bottom: 80px; right: 10px; width: 80px; height: 80px; background-image: url('https://api.iconify.design/flat-color-icons/cat.svg'); background-size: contain; background-repeat: no-repeat; opacity: 0; transition: opacity 0.5s 0.2s ease; transform: rotate(-15deg); pointer-events: none; }
+        body[data-theme='cat-theme'] #sidebar::before { opacity: 0.9; }
+        #theme-switcher { margin-top: auto; padding-top: 20px; border: none; background: transparent; color: var(--accent-color); cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; flex-shrink: 0; }
 
-        #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; position: relative; z-index: 1; }
-        #messages li { display: flex; padding: 15px 20px; border-radius: 18px; margin-bottom: 12px; max-width: 75%; width: fit-content; line-height: 1.5; opacity: 0; transform: translateY(20px); animation: slideUp 0.4s forwards; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
-        
-        /* 蛋糕气泡修复 */
-        body[data-theme='cat-theme'] #messages li { --cupcake-path: path('M15,100 C25,120 75,120 85,100 L100,100 L100,15 C90,0 70,0 60,15 C50,0 30,0 20,15 L0,15 L0,100 Z'); clip-path: var(--cupcake-path); padding: 30px 25px 25px; }
-        #messages li.my-message { background: var(--my-message-bg); color: #fff; margin-left: auto; text-align: right; }
-        #messages li.their-message { background-color: var(--their-message-bg); color: var(--text-color); margin-right: auto; }
-        #messages li.private-message { background-color: var(--private-msg-bg); border: 1px dashed var(--accent-color); }
-        #messages li.system-message { display: block; background: none; box-shadow: none; color: var(--secondary-text); font-style: italic; font-size: 0.9em; text-align: center; width: 100%; max-width: 100%; margin-left: auto; margin-right: auto; clip-path: none !important; }
-        
-        .message-content { display: flex; flex-direction: column; }
-        .message-sender { font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--secondary-text); }
+        /* --- 聊天主窗口 --- */
+        #main-chat { flex-grow: 1; display: flex; flex-direction: column; background-color: transparent; position: relative; height: 100%; }
+        #main-chat::before { content: '桐儿生日快乐'; position: absolute; top: 50%; left: 50%; width: 100%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; }
+        body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
+        #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; -webkit-overflow-scrolling: touch; }
+
+        /* --- 消息气泡完美修复 --- */
+        #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: -moz-fit-content; width: fit-content; opacity: 0; transform: translateY(20px); animation: slideUp 0.4s forwards; }
+        .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); line-height: 1.5; }
+        body[data-theme='cat-theme'] .message-bubble { --cupcake-path: path('M15,100 C25,120 75,120 85,100 L100,100 L100,15 C90,0 70,0 60,15 C50,0 30,0 20,15 L0,15 L0,100 Z'); clip-path: var(--cupcake-path); padding: 25px 22px 22px; }
+        li.my-message { align-self: flex-end; }
+        li.their-message { align-self: flex-start; }
+        .my-message .message-bubble { background: var(--my-message-bg); color: #fff; }
+        .their-message .message-bubble { background-color: var(--their-message-bg); color: var(--text-color); }
+        .private-message .message-bubble { background-color: var(--private-msg-bg); border: 1px dashed var(--accent-color); }
+        li.system-message { align-self: center; color: var(--secondary-text); font-style: italic; font-size: 0.9em; }
+        .message-sender { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; color: var(--secondary-text); padding: 0 5px; }
         .my-message .message-sender { display: none; }
         
-        #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); backdrop-filter: blur(10px); }
+        /* --- 输入框 --- */
+        #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); backdrop-filter: blur(10px); flex-shrink: 0; }
         #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 10px 18px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
         #input:focus { outline: none; border-color: var(--accent-color); }
         #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; }
         
+        /* --- 登录与移动端适配 --- */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 100; }
         #login-box { background: var(--panel-bg); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,.1); }
         #login-box input { padding: 12px; font-size: 1.1em; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; }
         #login-box button { padding: 12px 25px; font-size: 1.1em; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; }
-        
-        @media (max-width: 768px) { #sidebar { position: fixed; left: 0; top: 0; height: 100%; z-index: 10; margin-left: -280px; } body.sidebar-open #sidebar { margin-left: 0; } body.sidebar-open #main-chat { margin-left: 280px; } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; } }
+        @media (max-width: 768px) { #sidebar { position: fixed; left: 0; top: 0; z-index: 10; margin-left: -100%; } body.sidebar-open #sidebar { margin-left: 0; } body.sidebar-open #main-chat { filter: brightness(0.5); } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; } }
         @media (min-width: 769px) { #toggle-users { display: none; } }
     </style>
 </head>
 <body>
     <div id="flower-container"></div>
-    <div id="login-overlay">
-        <div id="login-box"><h2>Enter your nickname</h2><form id="login-form"><input id="nickname-input" autocomplete="off" required /><br/><button>Join Chat</button></form></div>
-    </div>
+    <div id="login-overlay"><div id="login-box"><h2>Enter your nickname</h2><form id="login-form"><input id="nickname-input" autocomplete="off" required /><br/><button>Join Chat</button></form></div></div>
     <div id="chat-container">
-        <div id="sidebar"><h2>Online Users</h2><ul id="user-list"></ul><button id="theme-switcher">✨ 切换到 陌上悠桐（庆生版）</button></div>
+        <div id="sidebar"><h2>Online Users</h2><ul id="user-list"></ul><button id="theme-switcher">✨ 切换到 桐儿生日版</button></div>
         <div id="main-chat"><ul id="messages"></ul><form id="form" action=""><input id="input" autocomplete="off" placeholder="Type a message..." /><button>Send</button></form></div>
     </div>
     <button id="toggle-users">&#9776;</button>
@@ -106,44 +105,47 @@
         const socket = io(); const loginOverlay = document.getElementById('login-overlay'); const loginForm = document.getElementById('login-form'); const nicknameInput = document.getElementById('nickname-input'); const form = document.getElementById('form'); const input = document.getElementById('input'); const messages = document.getElementById('messages'); const userList = document.getElementById('user-list'); const toggleButton = document.getElementById('toggle-users'); const themeSwitcher = document.getElementById('theme-switcher'); const flowerContainer = document.getElementById('flower-container');
         let myNickname = '';
 
-        // --- 聊天核心逻辑 ---
-        loginForm.addEventListener('submit', (e) => { e.preventDefault(); if (nicknameInput.value) { myNickname = nicknameInput.value; socket.emit('new user', myNickname); loginOverlay.style.display = 'none'; input.focus(); } });
-        form.addEventListener('submit', (e) => { e.preventDefault(); if (input.value) { socket.emit('chat message', input.value); input.value = ''; } });
-
-        // --- 消息处理器 (重构以显示文字) ---
+        // --- 消息处理器 (全新重构) ---
         const createMessageElement = (data) => {
             const item = document.createElement('li');
-            
-            const contentWrapper = document.createElement('div');
-            contentWrapper.className = 'message-content';
-
             const sender = document.createElement('span');
             sender.className = 'message-sender';
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = data.msg;
 
-            const msgText = document.createElement('span');
-            msgText.textContent = data.msg;
+            if (data.type === 'system') {
+                item.className = 'system-message';
+                item.textContent = data.msg;
+                messages.appendChild(item);
+                messages.scrollTop = messages.scrollHeight;
+                return;
+            }
             
             if (data.type === 'private') {
                 item.classList.add('private-message');
                 sender.textContent = `[私信] ${data.from} 对 ${data.to} 说:`;
             } else {
-                sender.textContent = data.username;
-                if (data.username === myNickname) { item.classList.add('my-message'); } else { item.classList.add('their-message'); }
+                sender.textContent = data.from;
             }
-
-            contentWrapper.appendChild(sender);
-            contentWrapper.appendChild(msgText);
-            item.appendChild(contentWrapper);
+            
+            if (data.from === myNickname) {
+                item.classList.add('my-message');
+            } else {
+                item.classList.add('their-message');
+                item.appendChild(sender);
+            }
+            
+            item.appendChild(bubble);
             messages.appendChild(item);
             messages.scrollTop = messages.scrollHeight;
         };
-        
-        socket.on('chat message', (data) => createMessageElement({ ...data, type: 'public' }));
-        socket.on('private message', (data) => createMessageElement({ ...data, type: 'private' }));
 
-        const showSystemMessage = (msg) => { const item = document.createElement('li'); item.textContent = msg; item.classList.add('system-message'); messages.appendChild(item); messages.scrollTop = messages.scrollHeight; };
-        socket.on('user joined', (username) => showSystemMessage(`${username} has joined.`));
-        socket.on('user left', (username) => { if (username) showSystemMessage(`${username} has left.`); });
+        // --- Socket 事件监听 ---
+        socket.on('chat message', (data) => createMessageElement({ ...data, from: data.username, type: 'public' }));
+        socket.on('private message', (data) => createMessageElement({ ...data, type: 'private' }));
+        socket.on('user joined', (username) => createMessageElement({ msg: `${username} has joined.`, type: 'system' }));
+        socket.on('user left', (username) => { if (username) createMessageElement({ msg: `${username} has left.`, type: 'system' }); });
 
         // --- 更新用户列表 (私聊功能) ---
         socket.on('update user list', (users) => {
@@ -157,17 +159,20 @@
                     item.classList.add('can-chat');
                     item.addEventListener('click', () => {
                         const pm = prompt(`发送私信给 ${user}:`);
-                        if (pm) { socket.emit('private message', { to: user, msg: pm }); }
+                        if (pm && pm.trim() !== '') { socket.emit('private message', { to: user, msg: pm }); }
                     });
                 }
                 userList.appendChild(item);
             });
         });
 
+        // --- 表单与按钮事件 ---
+        loginForm.addEventListener('submit', (e) => { e.preventDefault(); if (nicknameInput.value) { myNickname = nicknameInput.value; socket.emit('new user', myNickname); loginOverlay.style.display = 'none'; input.focus(); } });
+        form.addEventListener('submit', (e) => { e.preventDefault(); if (input.value) { socket.emit('chat message', input.value); input.value = ''; } });
         toggleButton.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
         
         // --- 主题与动画逻辑 ---
-        const themeOneName = "主题一", catThemeName = "陌上悠桐（庆生版）";
+        const themeOneName = "主题一", catThemeName = "桐儿生日版";
         function createFallingFlowers(){ flowerContainer.innerHTML=''; for(let i=0; i < 20; i++){ const flower = document.createElement("div"); flower.classList.add("flower"); const size = 20 * Math.random() + 15; flower.style.width = `${size}px`; flower.style.height = `${size}px`; flower.style.left = `${100 * Math.random()}%`; flower.style.animationDuration = `${8 * Math.random() + 7}s`; flower.style.animationDelay = `${10 * Math.random()}s`; flowerContainer.appendChild(flower); } }
         function applyTheme(theme){ if (theme === "cat-theme") { document.body.dataset.theme = "cat-theme"; themeSwitcher.innerHTML = `✨ 切换到 ${themeOneName}`; localStorage.setItem("chat_theme", "cat-theme"); createFallingFlowers(); } else { document.body.dataset.theme = "theme-one"; themeSwitcher.innerHTML = `✨ 切换到 ${catThemeName}`; localStorage.setItem("chat_theme", "theme-one"); flowerContainer.innerHTML = ""; } }
         themeSwitcher.addEventListener('click', () => { const current = localStorage.getItem('chat_theme') || 'theme-one'; applyTheme(current === 'cat-theme' ? 'theme-one' : 'cat-theme'); });
