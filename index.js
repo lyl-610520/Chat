@@ -20,12 +20,25 @@ io.on('connection', (socket) => {
 
   // 监听新用户加入
   socket.on('new user', (username) => {
+    // 检查用户名是否已经被使用
+    if (socketsByUsername[username]) {
+      // 如果存在，向该请求的客户端发送一个失败事件
+      socket.emit('nickname taken');
+      return; // 阻止后续代码执行
+    }
+
+    // 如果用户名可用，则走正常流程
     usersBySocketId[socket.id] = username;
     socketsByUsername[username] = socket.id;
+
+    // 通知该客户端登录成功
+    socket.emit('login success');
     
-    io.emit('user joined', username);
+    // 向所有其他客户端广播新用户加入
+    socket.broadcast.emit('user joined', username);
+    // 向所有客户端更新用户列表
     io.emit('update user list', Object.values(usersBySocketId));
-  });
+});
 
   // 监听公共聊天消息
   socket.on('chat message', (msg) => {
