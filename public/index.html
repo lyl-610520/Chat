@@ -125,7 +125,7 @@
         body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; }
 
-        /* --- 消息气泡 --- */
+        /* --- 【已修正】消息气泡的完整样式块 --- */
         #messages li { 
             display: flex; 
             flex-direction: column; 
@@ -135,10 +135,17 @@
             width: fit-content; 
             opacity: 0; 
             transform: translateY(20px); 
-            animation: slideUp 0.4s forwards; 
-            align-items: flex-start;
+            animation: slideUp 0.4s forwards;
         }
-        .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); line-height: 1.5; word-break: break-all; }
+        
+        .message-bubble { 
+            padding: 12px 18px; 
+            border-radius: 18px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08); 
+            line-height: 1.5; 
+            word-break: break-all; 
+        }
+
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
         body[data-theme='cat-theme'] .message-bubble {
@@ -156,9 +163,13 @@
         
         li.my-message { 
             align-self: flex-end; 
-            align-items: flex-end; 
+            align-items: flex-end; /* 关键修正 */
         }
-        li.their-message { align-self: flex-start; }
+        li.their-message { 
+            align-self: flex-start;
+            align-items: flex-start; /* 关键修正 */
+        }
+
         .my-message .message-bubble { background: var(--my-message-bg); color: #fff; }
         .their-message .message-bubble { background-color: var(--their-message-bg); color: var(--text-color); }
         .private-message .message-bubble { background-color: var(--private-msg-bg); color: var(--private-msg-text-color) !important; border: 1px dashed var(--accent-color); }
@@ -404,21 +415,14 @@
         ctx.stroke();
 
         ctx.fillStyle = '#FFCDD2';
-        const earWidth = w * 0.35;
-        const earYOffset = headCenterY - headRadius * 0.8;
-
+        const earBaseY = headCenterY - headRadius * 0.85;
+        const earTipY = headCenterY - headRadius * 1.5;
+        const earBaseWidth = headRadius * 0.6;
+        
         ctx.beginPath();
-        ctx.moveTo(headCenterX - earWidth * 0.1, headCenterY - headRadius * 0.5);
-        ctx.lineTo(headCenterX - earWidth, earYOffset);
-        ctx.lineTo(headCenterX, headCenterY - headRadius * 0.6);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(headCenterX + earWidth * 0.1, headCenterY - headRadius * 0.5);
-        ctx.lineTo(headCenterX + earWidth, earYOffset);
-        ctx.lineTo(headCenterX, headCenterY - headRadius * 0.6);
+        ctx.moveTo(headCenterX - earBaseWidth, earBaseY);
+        ctx.lineTo(headCenterX, earTipY);
+        ctx.lineTo(headCenterX + earBaseWidth, earBaseY);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
@@ -532,15 +536,10 @@
             
             const catCtx = setupCanvas(catCanvas);
             drawCat(catCtx);
+            
             if (blinkInterval) clearInterval(blinkInterval);
-            blinkInterval = setInterval(() => {
-                eyesOpen = false;
-                drawCat(catCtx);
-                setTimeout(() => {
-                    eyesOpen = true;
-                    drawCat(catCtx);
-                }, 200);
-            }, 4000);
+            // 【已优化】将眨眼逻辑封装，减少 applyTheme 的复杂性
+            startBlinking(catCtx);
 
             const cakeCtx = setupCanvas(cakeCanvas);
             drawCake(cakeCtx);
@@ -552,6 +551,24 @@
             effectsContainer.innerHTML = "";
             if (blinkInterval) clearInterval(blinkInterval);
         }
+    }
+    
+    // 【已优化】将眨眼动画封装成独立函数，并优化性能
+    function startBlinking(ctx) {
+        let isBlinking = false;
+        blinkInterval = setInterval(() => {
+            if(isBlinking) return; // 防止重复触发
+
+            isBlinking = true;
+            eyesOpen = false;
+            drawCat(ctx); // 闭眼
+
+            setTimeout(() => {
+                eyesOpen = true;
+                drawCat(ctx); // 睁眼
+                isBlinking = false;
+            }, 200); // 眨眼持续时间
+        }, 5000 + Math.random() * 2000); // 优化：5-7秒随机眨一次，更自然且性能更好
     }
 
     themeSwitcher.addEventListener('click', () => {
