@@ -127,7 +127,7 @@
         const flowerContainer = document.getElementById('flower-container');
         let myNickname = '';
 
-        // --- 消息处理器 ---
+               // --- 消息处理器 (修复私信显示) ---
         const createMessageElement = (data) => {
             const item = document.createElement('li');
             const sender = document.createElement('span');
@@ -136,6 +136,7 @@
             bubble.className = 'message-bubble';
             bubble.textContent = data.msg;
 
+            // 处理系统消息
             if (data.type === 'system') {
                 item.className = 'system-message';
                 item.textContent = data.msg;
@@ -144,22 +145,27 @@
                 return;
             }
             
+            // 判断是否是自己的消息，并添加对应样式
             if (data.from === myNickname) {
                 item.classList.add('my-message');
             } else {
                 item.classList.add('their-message');
             }
 
+            // 判断消息类型并生成发送者文本
             if (data.type === 'private') {
                 item.classList.add('private-message');
                 sender.textContent = `[私信] ${data.from} 对 ${data.to} 说:`;
+                // 无论是谁发的私信，都显示发送者
+                item.appendChild(sender);
             } else {
-                sender.textContent = data.from;
+                // 公共消息，只有别人的消息才显示发送者
+                if (data.from !== myNickname) {
+                    sender.textContent = data.from;
+                    item.appendChild(sender);
+                }
             }
             
-            if (data.from !== myNickname) {
-                item.appendChild(sender);
-            }
             item.appendChild(bubble);
             messages.appendChild(item);
             messages.scrollTop = messages.scrollHeight;
