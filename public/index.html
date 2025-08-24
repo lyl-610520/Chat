@@ -6,7 +6,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
-    <style>
+
+    <!-- 第二部分：CSS 样式将会粘贴在这里 -->
+</head>
+        <style>
         :root {
             --bg-color: #f0f2f5;
             --panel-bg: #ffffff;
@@ -17,10 +20,9 @@
             --my-message-bg: #5dade2;
             --their-message-bg: #e4e6eb;
             --private-msg-bg: #fffbe6;
-            --private-msg-text-color: #333; /* FIX: 私信文字颜色 */
+            --private-msg-text-color: #333; /* 私信文字颜色 */
             --display-font: 'ZCOOL KuaiLe', cursive;
         }
-
         body[data-theme='cat-theme'] {
             --bg-color: #fff5f8;
             --panel-bg: rgba(255, 255, 255, 0.88);
@@ -43,7 +45,6 @@
         /* --- 动态元素 --- */
         #flower-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
         .flower { position: absolute; background-size: contain; background-repeat: no-repeat; background-image: url('https://api.iconify.design/vscode-icons/file-type-sakura.svg'); animation: fall linear infinite; }
-        
         body::after { content: ''; position: fixed; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; right: -80px; bottom: -50px; width: 400px; height: 400px; background-image: url('https://www.freeiconspng.com/uploads/birthday-cake-icon-png-9.png'); background-size: contain; background-repeat: no-repeat; }
         body[data-theme='cat-theme']::after { opacity: 0.7; }
 
@@ -65,13 +66,13 @@
 
         /* --- 消息气泡完美修复 --- */
         #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: -moz-fit-content; width: fit-content; opacity: 0; transform: translateY(20px); animation: slideUp 0.4s forwards; }
-        .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); line-height: 1.5; overflow-wrap: break-word; /* FIX: 强制长字符换行 */ }
-        body[data-theme='cat-theme'] .message-bubble { clip-path: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M15,100 C25,120 75,120 85,100 L100,100 L100,15 C90,0 70,0 60,15 C50,0 30,0 20,15 L0,15 L0,100 Z' /></svg>#cupcake"); padding: 25px 22px 22px; }
+        .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); line-height: 1.5; word-break: break-all; }
+        body[data-theme='cat-theme'] .message-bubble { clip-path: url(#cupcake-clip); padding: 25px 22px 22px; border-radius: 0; }
         li.my-message { align-self: flex-end; }
         li.their-message { align-self: flex-start; }
         .my-message .message-bubble { background: var(--my-message-bg); color: #fff; }
         .their-message .message-bubble { background-color: var(--their-message-bg); color: var(--text-color); }
-        .private-message .message-bubble { background-color: var(--private-msg-bg); color: var(--private-msg-text-color); /* FIX: 私信文字颜色 */ border: 1px dashed var(--accent-color); }
+        .private-message .message-bubble { background-color: var(--private-msg-bg); color: var(--private-msg-text-color) !important; border: 1px dashed var(--accent-color); }
         li.system-message { align-self: center; color: var(--secondary-text); font-style: italic; font-size: 0.9em; }
         .message-sender { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; color: var(--secondary-text); padding: 0 5px; }
         
@@ -89,8 +90,16 @@
         @media (max-width: 768px) { #sidebar { position: fixed; left: 0; top: 0; width: 80%; max-width: 300px; z-index: 100; transform: translateX(-100%); } body.sidebar-open #sidebar { transform: translateX(0); } #main-chat { transition: filter 0.3s; } body.sidebar-open #main-chat { filter: brightness(0.5); pointer-events: none; } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; } }
         @media (min-width: 769px) { #toggle-users { display: none; } }
     </style>
-</head>
 <body>
+    <!-- 蛋糕气泡形状定义 -->
+    <svg width="0" height="0" style="position:absolute;z-index:-1;">
+        <defs>
+            <clipPath id="cupcake-clip" clipPathUnits="objectBoundingBox">
+                <path d="M0.15,1 C0.25,1.2 0.75,1.2 0.85,1 L1,1 L1,0.15 C0.9,0 0.7,0 0.6,0.15 C0.5,0 0.3,0 0.2,0.15 L0,0.15 L0,1 Z"></path>
+            </clipPath>
+        </defs>
+    </svg>
+
     <div id="flower-container"></div>
     <div id="login-overlay"><div id="login-box"><h2>Enter your nickname</h2><form id="login-form"><input id="nickname-input" autocomplete="off" required /><br/><button>Join Chat</button></form></div></div>
     <div id="chat-container">
@@ -99,13 +108,26 @@
     </div>
     <button id="toggle-users">&#9776;</button>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <!-- 第三部分：JavaScript 脚本将会粘贴在这里 -->
+</body>
+        <script src="/socket.io/socket.io.js"></script>
     <script>
         // --- 元素选取 ---
-        const socket = io(); const body = document.body; const loginOverlay = document.getElementById('login-overlay'); const loginForm = document.getElementById('login-form'); const nicknameInput = document.getElementById('nickname-input'); const form = document.getElementById('form'); const input = document.getElementById('input'); const messages = document.getElementById('messages'); const userList = document.getElementById('user-list'); const toggleButton = document.getElementById('toggle-users'); const themeSwitcher = document.getElementById('theme-switcher'); const flowerContainer = document.getElementById('flower-container');
+        const socket = io();
+        const body = document.body;
+        const loginOverlay = document.getElementById('login-overlay');
+        const loginForm = document.getElementById('login-form');
+        const nicknameInput = document.getElementById('nickname-input');
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+        const userList = document.getElementById('user-list');
+        const toggleButton = document.getElementById('toggle-users');
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const flowerContainer = document.getElementById('flower-container');
         let myNickname = '';
 
-        // --- 消息处理器 (重构) ---
+        // --- 消息处理器 ---
         const createMessageElement = (data) => {
             const item = document.createElement('li');
             const sender = document.createElement('span');
@@ -122,8 +144,11 @@
                 return;
             }
             
-            if (data.from === myNickname) item.classList.add('my-message');
-            else item.classList.add('their-message');
+            if (data.from === myNickname) {
+                item.classList.add('my-message');
+            } else {
+                item.classList.add('their-message');
+            }
 
             if (data.type === 'private') {
                 item.classList.add('private-message');
@@ -132,7 +157,9 @@
                 sender.textContent = data.from;
             }
             
-            if (data.from !== myNickname) item.appendChild(sender);
+            if (data.from !== myNickname) {
+                item.appendChild(sender);
+            }
             item.appendChild(bubble);
             messages.appendChild(item);
             messages.scrollTop = messages.scrollHeight;
@@ -144,7 +171,7 @@
         socket.on('user joined', (username) => createMessageElement({ msg: `${username} has joined.`, type: 'system' }));
         socket.on('user left', (username) => { if (username) createMessageElement({ msg: `${username} has left.`, type: 'system' }); });
 
-        // --- 更新用户列表 (私聊功能) ---
+        // --- 更新用户列表 ---
         socket.on('update user list', (users) => {
             userList.innerHTML = '';
             users.forEach(user => {
@@ -156,7 +183,9 @@
                     item.classList.add('can-chat');
                     item.addEventListener('click', () => {
                         const pm = prompt(`发送私信给 ${user}:`);
-                        if (pm && pm.trim() !== '') { socket.emit('private message', { to: user, msg: pm }); }
+                        if (pm && pm.trim() !== '') {
+                            socket.emit('private message', { to: user, msg: pm });
+                        }
                     });
                 }
                 userList.appendChild(item);
@@ -169,11 +198,43 @@
         toggleButton.addEventListener('click', () => body.classList.toggle('sidebar-open'));
         
         // --- 主题与动画逻辑 ---
-        const themeOneName = "主题一", catThemeName = "桐儿生日版";
-        function createFallingFlowers(){ flowerContainer.innerHTML=''; for(let i=0; i < 20; i++){ const flower = document.createElement("div"); flower.classList.add("flower"); const size = 20 * Math.random() + 15; flower.style.width = `${size}px`; flower.style.height = `${size}px`; flower.style.left = `${100 * Math.random()}%`; flower.style.animationDuration = `${8 * Math.random() + 7}s`; flower.style.animationDelay = `${10 * Math.random()}s`; flowerContainer.appendChild(flower); } }
-        function applyTheme(theme){ if (theme === "cat-theme") { body.dataset.theme = "cat-theme"; themeSwitcher.innerHTML = `✨ 切换到 ${themeOneName}`; localStorage.setItem("chat_theme", "cat-theme"); createFallingFlowers(); } else { body.dataset.theme = "theme-one"; themeSwitcher.innerHTML = `✨ 切换到 ${catThemeName}`; localStorage.setItem("chat_theme", "theme-one"); flowerContainer.innerHTML = ""; } }
-        themeSwitcher.addEventListener('click', () => { const current = localStorage.getItem('chat_theme') || 'theme-one'; applyTheme(current === 'cat-theme' ? 'theme-one' : 'cat-theme'); });
-        document.addEventListener('DOMContentLoaded', () => { const saved = localStorage.getItem('chat_theme') || 'theme-one'; applyTheme(saved); });
+        const themeOneName = "主题一";
+        const catThemeName = "桐儿生日版";
+
+        function createFallingFlowers(){
+            flowerContainer.innerHTML='';
+            for(let i=0; i < 20; i++){
+                const flower = document.createElement("div");
+                flower.classList.add("flower");
+                const size = 20 * Math.random() + 15;
+                flower.style.width = `${size}px`;
+                flower.style.height = `${size}px`;
+                flower.style.left = `${100 * Math.random()}%`;
+                flower.style.animationDuration = `${8 * Math.random() + 7}s`;
+                flower.style.animationDelay = `${10 * Math.random()}s`;
+                flowerContainer.appendChild(flower);
+            }
+        }
+        function applyTheme(theme){
+            if (theme === "cat-theme") {
+                body.dataset.theme = "cat-theme";
+                themeSwitcher.innerHTML = `✨ 切换到 ${themeOneName}`;
+                localStorage.setItem("chat_theme", "cat-theme");
+                createFallingFlowers();
+            } else {
+                body.dataset.theme = "theme-one";
+                themeSwitcher.innerHTML = `✨ 切换到 ${catThemeName}`;
+                localStorage.setItem("chat_theme", "theme-one");
+                flowerContainer.innerHTML = "";
+            }
+        }
+        themeSwitcher.addEventListener('click', () => {
+            const current = localStorage.getItem('chat_theme') || 'theme-one';
+            applyTheme(current === 'cat-theme' ? 'theme-one' : 'cat-theme');
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('chat_theme') || 'theme-one';
+            applyTheme(saved);
+});
     </script>
-</body>
 </html>
