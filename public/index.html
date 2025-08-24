@@ -399,62 +399,74 @@
         const w = ctx.canvas.width / (window.devicePixelRatio || 1);
         const h = ctx.canvas.height / (window.devicePixelRatio || 1);
         ctx.clearRect(0, 0, w * 2, h * 2);
-        
+    
         ctx.strokeStyle = '#5D4037';
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        ctx.fillStyle = '#FFF8E1';
-        const headCenterX = w / 2;
-        const headCenterY = h * 0.55;
-        const headRadius = w * 0.4;
+    // 头部轮廓
+    ctx.fillStyle = '#FFF8E1';
+    const headCenterX = w / 2;
+    const headCenterY = h * 0.55;
+    const headRadius = w * 0.4;
+    ctx.beginPath();
+    ctx.arc(headCenterX, headCenterY, headRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 【最终修正】耳朵，使用非常简单的三角形绘制
+    ctx.fillStyle = '#FFCDD2';
+
+    // 左耳
+    ctx.beginPath();
+    ctx.moveTo(headCenterX - headRadius * 0.7, headCenterY - headRadius * 0.2); // 左下角
+    ctx.lineTo(headCenterX - headRadius * 0.3, headCenterY - headRadius * 1.2); // 顶点
+    ctx.lineTo(headCenterX + headRadius * 0.1, headCenterY - headRadius * 0.7); // 右下角
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // 右耳
+    ctx.beginPath();
+    ctx.moveTo(headCenterX + headRadius * 0.7, headCenterY - headRadius * 0.2); // 右下角
+    ctx.lineTo(headCenterX + headRadius * 0.3, headCenterY - headRadius * 1.2); // 顶点
+    ctx.lineTo(headCenterX - headRadius * 0.1, headCenterY - headRadius * 0.7); // 左下角
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+
+    // 眼睛
+    ctx.fillStyle = '#5D4037';
+    const eyeY = headCenterY - h * 0.05;
+    if (eyesOpen) {
         ctx.beginPath();
-        ctx.arc(headCenterX, headCenterY, headRadius, 0, Math.PI * 2);
+        ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2);
+        ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2);
         ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#FFCDD2';
-        const earBaseY = headCenterY - headRadius * 0.85;
-        const earTipY = headCenterY - headRadius * 1.5;
-        const earBaseWidth = headRadius * 0.6;
-        
+    } else {
         ctx.beginPath();
-        ctx.moveTo(headCenterX - earBaseWidth, earBaseY);
-        ctx.lineTo(headCenterX, earTipY);
-        ctx.lineTo(headCenterX + earBaseWidth, earBaseY);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#5D4037';
-        const eyeY = headCenterY - h * 0.05;
-        if (eyesOpen) {
-            ctx.beginPath();
-            ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2);
-            ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            ctx.beginPath();
-            ctx.moveTo(w * 0.3, eyeY);
-            ctx.lineTo(w * 0.4, eyeY);
-            ctx.moveTo(w * 0.6, eyeY);
-            ctx.lineTo(w * 0.7, eyeY);
-            ctx.stroke();
-        }
-
-        const mouthY = headCenterY + h * 0.08;
-        ctx.beginPath();
-        ctx.moveTo(w * 0.45, mouthY);
-        ctx.lineTo(w * 0.55, mouthY);
-        ctx.moveTo(w * 0.5, mouthY);
-        ctx.lineTo(w * 0.5, mouthY + h * 0.05);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(w * 0.5, mouthY + h * 0.05, w * 0.15, 0.2 * Math.PI, 0.8 * Math.PI);
+        ctx.moveTo(w * 0.3, eyeY);
+        ctx.lineTo(w * 0.4, eyeY);
+        ctx.moveTo(w * 0.6, eyeY);
+        ctx.lineTo(w * 0.7, eyeY);
         ctx.stroke();
     }
+
+    // 嘴巴
+    const mouthY = headCenterY + h * 0.08;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.45, mouthY);
+    ctx.lineTo(w * 0.55, mouthY);
+    ctx.moveTo(w * 0.5, mouthY);
+    ctx.lineTo(w * 0.5, mouthY + h * 0.05);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(w * 0.5, mouthY + h * 0.05, w * 0.15, 0.2 * Math.PI, 0.8 * Math.PI);
+    ctx.stroke();
+}
     
     function makeDraggable(element) {
         let isDragging = false, hasMoved = false, offsetX, offsetY;
