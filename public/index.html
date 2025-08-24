@@ -6,17 +6,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
-code
-Code
-
-download
-
-content_copy
-
-expand_less
-<!-- 第二部分：CSS 样式将会粘贴在这里 -->
-</head>
-        <style>
+    <style>
+        /* --- 默认主题变量 --- */
         :root {
             --bg-color: #f0f2f5;
             --panel-bg: #ffffff;
@@ -27,101 +18,180 @@ expand_less
             --my-message-bg: #5dade2;
             --their-message-bg: #e4e6eb;
             --private-msg-bg: #fffbe6;
-            --private-msg-text-color: #333; /* 私信文字颜色 */
+            --private-msg-text-color: #333;
             --display-font: 'ZCOOL KuaiLe', cursive;
         }
+
+        /* --- 【全新】桐儿生日版 主题变量 --- */
         body[data-theme='cat-theme'] {
-            --bg-color: #fff5f8;
-            --panel-bg: rgba(255, 255, 255, 0.88);
-            --accent-color: #ff85a2;
+            --bg-color: #fdf2f6; /* 柔和的粉色背景 */
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --accent-color: #ff85a2; /* 甜美的粉色 */
             --text-color: #4a4a4a;
-            --secondary-text: #b5a5d8;
+            --secondary-text: #a88fb8; /* 温柔的紫色 */
             --border-color: #ffc2d4;
-            --my-message-bg: linear-gradient(135deg, #ffacc7, #ffd1dc);
+            --my-message-bg: #ffb9d4;
             --their-message-bg: #ffffff;
-            --private-msg-bg: #f0f8ff;
+            --private-msg-bg: #f5f3ff;
         }
-code
-Code
 
-download
+        /* --- 基础与动画 --- */
+        html, body { height: 100%; margin: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; background-color: var(--bg-color); overflow: hidden; transition: background-color 0.5s ease; }
+        #chat-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; }
+        
+        /* --- 【全新】梧桐花飘落动画 --- */
+        @keyframes fall {
+            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) translateX(15vw) rotate(720deg); opacity: 0; }
+        }
+        @keyframes fall-reverse {
+            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) translateX(-15vw) rotate(-720deg); opacity: 0; }
+        }
 
-content_copy
+        /* --- 【全新】动态元素：梧桐花、蛋糕、猫咪 --- */
+        #special-effects-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .flower {
+            position: absolute;
+            background-size: contain;
+            background-repeat: no-repeat;
+            /* 使用梧桐花图标 */
+            background-image: url('https://api.iconify.design/emojione/fallen-leaf.svg?color=%23c4a484');
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+        /* 为一半的花应用反向动画，制造错落感 */
+        .flower.reverse {
+             animation-name: fall-reverse;
+             background-image: url('https://api.iconify.design/emojione/fallen-leaf.svg?color=%23d4b494');
+        }
+        .flower:not(.reverse) {
+            animation-name: fall;
+        }
 
-expand_less
-/* --- 基础与动画 --- */
-    html, body { height: 100%; margin: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; background-color: var(--bg-color); overflow: hidden; transition: background-color 0.5s ease; }
-    #chat-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; }
-    @keyframes fall { 0% { top: -10%; opacity: 1; transform: translateX(0) rotate(0deg); } 100% { top: 110%; opacity: 0.5; transform: translateX(100px) rotate(360deg); } }
-    @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        /* 【全新】华丽的生日蛋糕 */
+        #birthday-cake {
+            position: fixed;
+            z-index: 0;
+            right: -80px;
+            bottom: -50px;
+            width: 450px;
+            height: 450px;
+            background-image: url('https://www.freeiconspng.com/uploads/birthday-cake-icon-transparent-background-22.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.8s ease-in-out;
+            pointer-events: none;
+        }
+        body[data-theme='cat-theme'] #birthday-cake {
+            opacity: 0.9;
+            transform: scale(1);
+            right: -20px;
+            bottom: -20px;
+        }
+        
+        /* 【全新】可爱的猫咪看板娘 */
+        #cat-mascot {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            background-image: url('https://api.iconify.design/twemoji/smiling-cat-with-heart-eyes.svg');
+            background-size: 80%;
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+            z-index: 101;
+            transition: transform 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        body[data-theme='cat-theme'] #cat-mascot {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #cat-mascot:hover {
+            transform: scale(1.1) rotate(-5deg);
+        }
+        #cat-mascot.tapped {
+            animation: cat-tap-animation 0.5s ease;
+        }
+        @keyframes cat-tap-animation {
+            0% { transform: scale(1.1); }
+            50% { transform: scale(0.9) rotate(5deg); }
+            100% { transform: scale(1.1) rotate(-5deg); }
+        }
 
-    /* --- 动态元素 --- */
-    #flower-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-    .flower { position: absolute; background-size: contain; background-repeat: no-repeat; background-image: url('https://api.iconify.design/vscode-icons/file-type-sakura.svg'); animation: fall linear infinite; }
-    body::after { content: ''; position: fixed; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; right: -80px; bottom: -50px; width: 400px; height: 400px; background-image: url('https://www.freeiconspng.com/uploads/birthday-cake-icon-png-9.png'); background-size: contain; background-repeat: no-repeat; }
-    body[data-theme='cat-theme']::after { opacity: 0.7; }
+        /* --- 侧边栏 --- */
+        #sidebar { width: 280px; background-color: var(--panel-bg); backdrop-filter: blur(10px); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; transition: all 0.5s ease; position: relative; height: 100%; }
+        #sidebar h2 { margin: 0 0 20px 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; flex-shrink: 0; }
+        #user-list { list-style-type: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; -webkit-overflow-scrolling: touch; }
+        #user-list li { padding: 10px; border-radius: 12px; margin-bottom: 5px; color: var(--secondary-text); font-weight: 500; transition: background-color 0.2s; }
+        #user-list li.can-chat:hover { background-color: rgba(0,0,0,0.05); cursor: pointer; }
+        #theme-switcher { margin-top: auto; padding-top: 20px; border: none; background: transparent; color: var(--accent-color); cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; flex-shrink: 0; }
 
-    /* --- 侧边栏完美布局 --- */
-    #sidebar { width: 280px; background-color: var(--panel-bg); backdrop-filter: blur(10px); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; transition: all 0.5s ease; position: relative; height: 100%; }
-    #sidebar h2 { margin: 0 0 20px 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; flex-shrink: 0; }
-    #user-list { list-style-type: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; -webkit-overflow-scrolling: touch; }
-    #user-list li { padding: 10px; border-radius: 12px; margin-bottom: 5px; color: var(--secondary-text); font-weight: 500; transition: background-color 0.2s; }
-    #user-list li.can-chat:hover { background-color: rgba(0,0,0,0.05); cursor: pointer; }
-    #sidebar::before { content: ''; position: absolute; bottom: 80px; right: 10px; width: 80px; height: 80px; background-image: url('https://api.iconify.design/flat-color-icons/cat.svg'); background-size: contain; background-repeat: no-repeat; opacity: 0; transition: opacity 0.5s 0.2s ease; transform: rotate(-15deg); pointer-events: none; }
-    body[data-theme='cat-theme'] #sidebar::before { opacity: 0.9; }
-    #theme-switcher { margin-top: auto; padding-top: 20px; border: none; background: transparent; color: var(--accent-color); cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; flex-shrink: 0; }
+        /* --- 聊天主窗口 --- */
+        #main-chat { flex-grow: 1; display: flex; flex-direction: column; background-color: transparent; position: relative; height: 100%; }
+        #main-chat::before { content: '桐儿生日快乐'; position: absolute; top: 50%; left: 50%; width: 100%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; }
+        body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
+        #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; }
 
-    /* --- 聊天主窗口 --- */
-    #main-chat { flex-grow: 1; display: flex; flex-direction: column; background-color: transparent; position: relative; height: 100%; }
-    #main-chat::before { content: '桐儿生日快乐'; position: absolute; top: 50%; left: 50%; width: 100%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; }
-    body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
-    #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; }
+        /* --- 消息气泡 --- */
+        #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: -moz-fit-content; width: fit-content; opacity: 0; transform: translateY(20px); animation: slideUp 0.4s forwards; }
+        .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); line-height: 1.5; word-break: break-all; }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
-    /* --- 消息气泡完美修复 --- */
-    #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: -moz-fit-content; width: fit-content; opacity: 0; transform: translateY(20px); animation: slideUp 0.4s forwards; }
-    .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); line-height: 1.5; word-break: break-all; }
-    body[data-theme='cat-theme'] .message-bubble { clip-path: url(#cupcake-clip); padding: 25px 22px 22px; border-radius: 0; }
-    li.my-message { align-self: flex-end; }
-    li.their-message { align-self: flex-start; }
-    .my-message .message-bubble { background: var(--my-message-bg); color: #fff; }
-    .their-message .message-bubble { background-color: var(--their-message-bg); color: var(--text-color); }
-    .private-message .message-bubble { background-color: var(--private-msg-bg); color: var(--private-msg-text-color) !important; border: 1px dashed var(--accent-color); }
-    li.system-message { align-self: center; color: var(--secondary-text); font-style: italic; font-size: 0.9em; }
-    .message-sender { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; color: var(--secondary-text); padding: 0 5px; }
-    
-    /* --- 输入框 --- */
-    #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); backdrop-filter: blur(10px); flex-shrink: 0; }
-    #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 10px 18px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
-    #input:focus { outline: none; border-color: var(--accent-color); }
-    #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; }
-    
-    /* --- 登录与移动端适配 --- */
-    #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 100; }
-    #login-box { background: var(--panel-bg); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,.1); }
-    #login-box input { padding: 12px; font-size: 1.1em; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; }
-    #login-box button { padding: 12px 25px; font-size: 1.1em; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; }
-    @media (max-width: 768px) { #sidebar { position: fixed; left: 0; top: 0; width: 80%; max-width: 300px; z-index: 100; transform: translateX(-100%); } body.sidebar-open #sidebar { transform: translateX(0); } #main-chat { transition: filter 0.3s; } body.sidebar-open #main-chat { filter: brightness(0.5); pointer-events: none; } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; } }
-    @media (min-width: 769px) { #toggle-users { display: none; } }
-</style>
+        /* --- 【全新】生日版气泡样式 --- */
+        body[data-theme='cat-theme'] .message-bubble {
+            border: 2px solid #ffdae5;
+            box-shadow: 0 4px 12px rgba(255, 133, 162, 0.15);
+            position: relative;
+            padding: 15px 25px;
+        }
+        /* 用伪元素给气泡加上可爱的装饰 */
+        body[data-theme='cat-theme'] .message-bubble::before,
+        body[data-theme='cat-theme'] .message-bubble::after {
+            content: '🎀'; /* 小蝴蝶结 */
+            position: absolute;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        body[data-theme='cat-theme'] .message-bubble::before { top: -10px; left: 15px; transform: rotate(-20deg); }
+        body[data-theme='cat-theme'] .message-bubble::after { bottom: -12px; right: 15px; transform: rotate(15deg); }
+        
+        li.my-message { align-self: flex-end; }
+        li.their-message { align-self: flex-start; }
+        .my-message .message-bubble { background: var(--my-message-bg); color: #fff; }
+        .their-message .message-bubble { background-color: var(--their-message-bg); color: var(--text-color); }
+        .private-message .message-bubble { background-color: var(--private-msg-bg); color: var(--private-msg-text-color) !important; border: 1px dashed var(--accent-color); }
+        li.system-message { align-self: center; color: var(--secondary-text); font-style: italic; font-size: 0.9em; }
+        .message-sender { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; color: var(--secondary-text); padding: 0 5px; }
+        
+        /* --- 输入框 --- */
+        #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); backdrop-filter: blur(10px); flex-shrink: 0; }
+        #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 10px 18px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
+        #input:focus { outline: none; border-color: var(--accent-color); }
+        #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; }
+        
+        /* --- 登录与移动端适配 --- */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        #login-box { background: var(--panel-bg); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,.1); }
+        #login-box input { padding: 12px; font-size: 1.1em; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; }
+        #login-box button { padding: 12px 25px; font-size: 1.1em; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; }
+        @media (max-width: 768px) { #sidebar { position: fixed; left: 0; top: 0; width: 80%; max-width: 300px; z-index: 100; transform: translateX(-100%); } body.sidebar-open #sidebar { transform: translateX(0); } #main-chat { transition: filter 0.3s; } body.sidebar-open #main-chat { filter: brightness(0.5); pointer-events: none; } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; } }
+        @media (min-width: 769px) { #toggle-users { display: none; } }
+    </style>
+</head>
 <body>
-    <!-- 蛋糕气泡形状定义 -->
-    <svg width="0" height="0" style="position:absolute;z-index:-1;">
-        <defs>
-            <clipPath id="cupcake-clip" clipPathUnits="objectBoundingBox">
-                <path d="M0.15,1 C0.25,1.2 0.75,1.2 0.85,1 L1,1 L1,0.15 C0.9,0 0.7,0 0.6,0.15 C0.5,0 0.3,0 0.2,0.15 L0,0.15 L0,1 Z"></path>
-            </clipPath>
-        </defs>
-    </svg>
-code
-Code
 
-download
+<div id="special-effects-container"></div>
+<div id="birthday-cake"></div>
+<div id="cat-mascot"></div>
 
-content_copy
-
-expand_less
-<div id="flower-container"></div>
 <div id="login-overlay"><div id="login-box"><h2>Enter your nickname</h2><form id="login-form"><input id="nickname-input" autocomplete="off" required /><br/><button>Join Chat</button></form></div></div>
 <div id="chat-container">
     <div id="sidebar"><h2>Online Users</h2><ul id="user-list"></ul><button id="theme-switcher">✨ 切换到 桐儿生日版</button></div>
@@ -129,33 +199,25 @@ expand_less
 </div>
 <button id="toggle-users">&#9776;</button>
 
-<!-- 第三部分：JavaScript 脚本将会粘贴在这里 -->
-</body>
-        <script src="/socket.io/socket.io.js"></script>
-    <script>
-        // --- 元素选取 ---
-        const socket = io();
-        const body = document.body;
-        const loginOverlay = document.getElementById('login-overlay');
-        const loginForm = document.getElementById('login-form');
-        const nicknameInput = document.getElementById('nickname-input');
-        const form = document.getElementById('form');
-        const input = document.getElementById('input');
-        const messages = document.getElementById('messages');
-        const userList = document.getElementById('user-list');
-        const toggleButton = document.getElementById('toggle-users');
-        const themeSwitcher = document.getElementById('theme-switcher');
-        const flowerContainer = document.getElementById('flower-container');
-        let myNickname = '';
-code
-Code
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    // --- 元素选取 ---
+    const socket = io();
+    const body = document.body;
+    const loginOverlay = document.getElementById('login-overlay');
+    const loginForm = document.getElementById('login-form');
+    const nicknameInput = document.getElementById('nickname-input');
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const messages = document.getElementById('messages');
+    const userList = document.getElementById('user-list');
+    const toggleButton = document.getElementById('toggle-users');
+    const themeSwitcher = document.getElementById('theme-switcher');
+    const effectsContainer = document.getElementById('special-effects-container');
+    const catMascot = document.getElementById('cat-mascot'); // 【新增】猫咪元素
+    let myNickname = '';
 
-download
-
-content_copy
-
-expand_less
-// --- 消息处理器 (修复私信显示) ---
+    // --- 消息处理器 ---
     const createMessageElement = (data) => {
         const item = document.createElement('li');
         const sender = document.createElement('span');
@@ -164,7 +226,6 @@ expand_less
         bubble.className = 'message-bubble';
         bubble.textContent = data.msg;
 
-        // 处理系统消息
         if (data.type === 'system') {
             item.className = 'system-message';
             item.textContent = data.msg;
@@ -173,21 +234,17 @@ expand_less
             return;
         }
         
-        // 判断是否是自己的消息，并添加对应样式
         if (data.from === myNickname) {
             item.classList.add('my-message');
         } else {
             item.classList.add('their-message');
         }
 
-        // 判断消息类型并生成发送者文本
         if (data.type === 'private') {
             item.classList.add('private-message');
             sender.textContent = `[私信] ${data.from} 对 ${data.to} 说:`;
-            // 无论是谁发的私信，都显示发送者
             item.appendChild(sender);
         } else {
-            // 公共消息，只有别人的消息才显示发送者
             if (data.from !== myNickname) {
                 sender.textContent = data.from;
                 item.appendChild(sender);
@@ -231,45 +288,71 @@ expand_less
     form.addEventListener('submit', (e) => { e.preventDefault(); if (input.value) { socket.emit('chat message', input.value); input.value = ''; } });
     toggleButton.addEventListener('click', () => body.classList.toggle('sidebar-open'));
     
-    // --- 主题与动画逻辑 ---
-    const themeOneName = "主题一";
+    // --- 【全新】主题与动画逻辑 ---
+    const defaultThemeName = "简约主题";
     const catThemeName = "桐儿生日版";
 
-    function createFallingFlowers(){
-        flowerContainer.innerHTML='';
-        for(let i=0; i < 20; i++){
+    // 【改进】创建更自然的梧桐花飘落效果
+    function createFallingFlowers() {
+        effectsContainer.innerHTML = ''; // 清空旧的花
+        const flowerCount = 25; // 增加花的数量
+        for (let i = 0; i < flowerCount; i++) {
             const flower = document.createElement("div");
             flower.classList.add("flower");
+
+            // 随机左右飘落
+            if(Math.random() > 0.5) {
+                flower.classList.add("reverse");
+            }
+            
             const size = 20 * Math.random() + 15;
             flower.style.width = `${size}px`;
             flower.style.height = `${size}px`;
-            flower.style.left = `${100 * Math.random()}%`;
-            flower.style.animationDuration = `${8 * Math.random() + 7}s`;
-            flower.style.animationDelay = `${10 * Math.random()}s`;
-            flowerContainer.appendChild(flower);
+            flower.style.left = `${100 * Math.random()}vw`;
+            // 随机持续时间
+            flower.style.animationDuration = `${10 * Math.random() + 8}s`;
+             // 随机延迟
+            flower.style.animationDelay = `${15 * Math.random()}s`;
+            // 随机初始旋转角度
+            flower.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+            effectsContainer.appendChild(flower);
         }
     }
-    function applyTheme(theme){
+
+    // 【新增】猫咪互动逻辑
+    catMascot.addEventListener('click', () => {
+        catMascot.classList.add('tapped');
+        // 动画结束后移除class，以便下次点击
+        setTimeout(() => {
+            catMascot.classList.remove('tapped');
+        }, 500);
+    });
+
+    function applyTheme(theme) {
         if (theme === "cat-theme") {
             body.dataset.theme = "cat-theme";
-            themeSwitcher.innerHTML = `✨ 切换到 ${themeOneName}`;
+            themeSwitcher.innerHTML = `✨ 切换到 ${defaultThemeName}`;
             localStorage.setItem("chat_theme", "cat-theme");
-            createFallingFlowers();
+            createFallingFlowers(); // 应用主题时创建花
         } else {
-            body.dataset.theme = "theme-one";
+            body.dataset.theme = "default";
             themeSwitcher.innerHTML = `✨ 切换到 ${catThemeName}`;
-            localStorage.setItem("chat_theme", "theme-one");
-            flowerContainer.innerHTML = "";
+            localStorage.setItem("chat_theme", "default");
+            effectsContainer.innerHTML = ""; // 切换走时清除花
         }
     }
+
     themeSwitcher.addEventListener('click', () => {
-        const current = localStorage.getItem('chat_theme') || 'theme-one';
-        applyTheme(current === 'cat-theme' ? 'theme-one' : 'cat-theme');
+        const current = localStorage.getItem('chat_theme') || 'default';
+        applyTheme(current === 'cat-theme' ? 'default' : 'cat-theme');
     });
+
     document.addEventListener('DOMContentLoaded', () => {
-        const saved = localStorage.getItem('chat_theme') || 'theme-one';
+        const saved = localStorage.getItem('chat_theme') || 'default';
         applyTheme(saved);
-});
+    });
 </script>
 
+</body>
 </html>
