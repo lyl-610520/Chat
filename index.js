@@ -8,7 +8,7 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
-// 存储在线用户，这次我们需要双向查找
+// 存储在线用户
 const usersBySocketId = {}; // 通过 socket.id 找 username
 const socketsByUsername = {}; // 通过 username 找 socket.id
 
@@ -18,7 +18,7 @@ app.use(express.static('public'));
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  // 监听新用户加入
+  // 【已修改】监听新用户加入，增加昵称重复检查
   socket.on('new user', (username) => {
     // 检查用户名是否已经被使用
     if (socketsByUsername[username]) {
@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('user joined', username);
     // 向所有客户端更新用户列表
     io.emit('update user list', Object.values(usersBySocketId));
-});
+  });
 
   // 监听公共聊天消息
   socket.on('chat message', (msg) => {
@@ -46,7 +46,7 @@ io.on('connection', (socket) => {
     io.emit('chat message', { username, msg });
   });
 
-  // 【新增】监听私聊消息
+  // 监听私聊消息
   socket.on('private message', (data) => {
     const fromUser = usersBySocketId[socket.id];
     const targetSocketId = socketsByUsername[data.to];
