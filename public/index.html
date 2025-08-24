@@ -70,22 +70,23 @@
             animation-name: fall;
         }
 
-        /* 【全新】华丽的生日蛋糕 */
-        #birthday-cake {
-            position: fixed;
-            z-index: 0;
-            right: -80px;
-            bottom: -50px;
-            width: 450px;
-            height: 450px;
-            background-image: url('https://www.freeiconspng.com/uploads/birthday-cake-icon-transparent-background-22.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: all 0.8s ease-in-out;
-            pointer-events: none;
-        }
+        /* --- 【全新】Canvas 蛋糕样式 --- */
+#birthday-cake {
+    position: fixed;
+    z-index: 0;
+    right: -80px;
+    bottom: -50px;
+    width: 450px;
+    height: 450px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.8s ease-in-out;
+    pointer-events: none;
+}
+#cake-canvas {
+    width: 100%;
+    height: 100%;
+}
         body[data-theme='cat-theme'] #birthday-cake {
             opacity: 0.9;
             transform: scale(1);
@@ -93,23 +94,27 @@
             bottom: -20px;
         }
         
-        /* 【全新】可爱的猫咪看板娘 */
-        #cat-mascot {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 120px;
-            height: 120px;
-            background-image: url('https://api.iconify.design/twemoji/smiling-cat-with-heart-eyes.svg');
-            background-size: 80%;
-            background-repeat: no-repeat;
-            background-position: center;
-            cursor: pointer;
-            z-index: 101;
-            transition: transform 0.3s ease;
-            opacity: 0;
-            pointer-events: none;
-        }
+        /* --- 【全新】Canvas 猫咪样式 --- */
+#cat-mascot {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 120px;
+    height: 120px;
+    cursor: grab; /* 初始光标样式 */
+    z-index: 101;
+    transition: opacity 0.3s ease, transform 0.3s ease; /* 保留动画效果 */
+    opacity: 0;
+    pointer-events: none;
+}
+#cat-canvas {
+    width: 100%;
+    height: 100%;
+}
+#cat-mascot:active {
+    cursor: grabbing; /* 拖动时的光标样式 */
+    transform: scale(1.1); /* 拖动时稍微放大，提供反馈 */
+}
         body[data-theme='cat-theme'] #cat-mascot {
             opacity: 1;
             pointer-events: auto;
@@ -189,8 +194,12 @@
 <body>
 
 <div id="special-effects-container"></div>
-<div id="birthday-cake"></div>
-<div id="cat-mascot"></div>
+<div id="birthday-cake">
+    <canvas id="cake-canvas"></canvas>
+</div>
+<div id="cat-mascot">
+    <canvas id="cat-canvas"></canvas>
+</div>
 
 <div id="login-overlay"><div id="login-box"><h2>Enter your nickname</h2><form id="login-form"><input id="nickname-input" autocomplete="off" required /><br/><button>Join Chat</button></form></div></div>
 <div id="chat-container">
@@ -215,6 +224,8 @@
     const themeSwitcher = document.getElementById('theme-switcher');
     const effectsContainer = document.getElementById('special-effects-container');
     const catMascot = document.getElementById('cat-mascot'); // 【新增】猫咪元素
+    const catCanvas = document.getElementById('cat-canvas');
+    const cakeCanvas = document.getElementById('cake-canvas');
     let myNickname = '';
 
     // --- 消息处理器 ---
@@ -347,14 +358,6 @@ socket.on('login success', () => {
         }
     }
 
-    // 【新增】猫咪互动逻辑
-    catMascot.addEventListener('click', () => {
-        catMascot.classList.add('tapped');
-        // 动画结束后移除class，以便下次点击
-        setTimeout(() => {
-            catMascot.classList.remove('tapped');
-        }, 500);
-    });
 
     function applyTheme(theme) {
         if (theme === "cat-theme") {
@@ -376,9 +379,274 @@ socket.on('login success', () => {
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-        const saved = localStorage.getItem('chat_theme') || 'default';
-        applyTheme(saved);
-    });
+    // 初始化 Canvas
+    const catCtx = setupCanvas(catCanvas);
+    const cakeCtx = setupCanvas(cakeCanvas);
+    
+    // 绘制图形
+    drawCat(catCtx);
+    drawCake(cakeCtx);
+    
+    // 启动猫咪动画
+    startBlinking(catCtx);
+    
+    // 启用猫咪拖动
+    makeDraggable(catMascot);
+
+    // 应用保存的主题
+    const saved = localStorage.getItem('chat_theme') || 'default';
+    applyTheme(saved);
+});
+
+code
+JavaScript
+// --- 【全新】Canvas 绘图与交互逻辑 ---
+
+// 设置 Canvas 的分辨率，防止模糊
+function setupCanvas(canvas) {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    return ctx;
+}
+
+// 绘制手绘风蛋糕
+function drawCake(ctx) {
+    const canvas = ctx.canvas;
+    const w = canvas.width / (window.devicePixelRatio || 1);
+    const h = canvas.height / (window.devicePixelRatio || 1);
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 盘子
+    ctx.fillStyle = '#d1e5f0';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.5, h * 0.85, w * 0.4, h * 0.08, 0, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // 蛋糕底层
+    ctx.fillStyle = '#ffc2d4'; // 粉色
+    ctx.beginPath();
+    ctx.rect(w * 0.15, h * 0.65, w * 0.7, h * 0.2);
+    ctx.fill();
+
+    // 奶油夹心
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.rect(w * 0.15, h * 0.63, w * 0.7, h * 0.05);
+    ctx.fill();
+
+    // 蛋糕顶层
+    ctx.fillStyle = '#ffb9d4'; // 稍浅的粉色
+    ctx.beginPath();
+    ctx.rect(w * 0.2, h * 0.45, w * 0.6, h * 0.2);
+    ctx.fill();
+
+    // 顶层融化的奶油
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(w * 0.2, h * 0.45);
+    ctx.quadraticCurveTo(w * 0.3, h * 0.5, w * 0.4, h * 0.45);
+    ctx.quadraticCurveTo(w * 0.5, h * 0.4, w * 0.6, h * 0.45);
+    ctx.quadraticCurveTo(w * 0.7, h * 0.5, w * 0.8, h * 0.45);
+    ctx.lineTo(w * 0.8, h * 0.42);
+    ctx.lineTo(w * 0.2, h * 0.42);
+    ctx.closePath();
+    ctx.fill();
+    
+    // 草莓
+    ctx.fillStyle = '#ff6b6b';
+    ctx.beginPath();
+    ctx.arc(w * 0.5, h * 0.35, w * 0.08, Math.PI, 0);
+    ctx.lineTo(w * 0.5, h * 0.25);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#6ab04c'; // 草莓叶子
+    ctx.beginPath();
+    ctx.arc(w*0.5, h*0.35, w*0.09, Math.PI-0.5, -0.5);
+    ctx.fill();
+
+
+    // 蜡烛
+    const candleX = w * 0.5;
+    const candleY = h * 0.25;
+    ctx.fillStyle = '#f0e68c'; // 蜡烛
+    ctx.beginPath();
+    ctx.rect(candleX - w * 0.02, candleY - h * 0.15, w * 0.04, h * 0.15);
+    ctx.fill();
+    
+    // 火焰
+    ctx.fillStyle = '#ffd700'; // 黄色
+    ctx.beginPath();
+    ctx.ellipse(candleX, candleY - h * 0.18, w * 0.02, h * 0.04, 0, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 165, 0, 0.7)'; // 橙色
+     ctx.beginPath();
+    ctx.ellipse(candleX, candleY - h * 0.17, w * 0.015, h * 0.03, 0, 0, 2 * Math.PI);
+    ctx.fill();
+}
+
+
+// 绘制手绘风猫咪 (带眨眼动画)
+let eyesOpen = true;
+let blinkInterval;
+
+function drawCat(ctx) {
+    const canvas = ctx.canvas;
+    const w = canvas.width / (window.devicePixelRatio || 1);
+    const h = canvas.height / (window.devicePixelRatio || 1);
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.strokeStyle = '#4a4a4a';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // 脸部轮廓
+    ctx.fillStyle = '#fdf2f6'; // 匹配主题的淡粉色
+    ctx.beginPath();
+    ctx.arc(w / 2, h / 2, w * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 耳朵
+    // 左耳
+    ctx.beginPath();
+    ctx.moveTo(w * 0.2, h * 0.4);
+    ctx.lineTo(w * 0.3, h * 0.15);
+    ctx.lineTo(w * 0.45, h * 0.3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // 右耳
+    ctx.beginPath();
+    ctx.moveTo(w * 0.8, h * 0.4);
+    ctx.lineTo(w * 0.7, h * 0.15);
+    ctx.lineTo(w * 0.55, h * 0.3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // 眼睛
+    const eyeY = h * 0.45;
+    if (eyesOpen) {
+        ctx.fillStyle = '#4a4a4a';
+        ctx.beginPath();
+        ctx.arc(w * 0.35, eyeY, w * 0.06, 0, Math.PI * 2); // 左眼
+        ctx.arc(w * 0.65, eyeY, w * 0.06, 0, Math.PI * 2); // 右眼
+        ctx.fill();
+    } else { // 闭眼 (一条线)
+        ctx.beginPath();
+        ctx.moveTo(w * 0.3, eyeY);
+        ctx.lineTo(w * 0.4, eyeY);
+        ctx.moveTo(w * 0.6, eyeY);
+        ctx.lineTo(w * 0.7, eyeY);
+        ctx.stroke();
+    }
+
+    // 嘴巴和鼻子
+    ctx.beginPath();
+    ctx.moveTo(w * 0.5, h * 0.55); // 鼻子顶部
+    ctx.lineTo(w * 0.45, h * 0.6);
+    ctx.lineTo(w * 0.55, h * 0.6);
+    ctx.closePath();
+    ctx.fillStyle = '#ff85a2';
+    ctx.fill();
+
+    // 微笑
+    ctx.beginPath();
+    ctx.arc(w * 0.5, h * 0.6, w * 0.15, 0.2 * Math.PI, 0.8 * Math.PI);
+    ctx.stroke();
+
+    // 胡须
+    for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        // 左胡须
+        ctx.moveTo(w * 0.25, h * 0.55 + i * 5);
+        ctx.lineTo(w * 0.1, h * 0.5 + i * 10);
+        // 右胡须
+        ctx.moveTo(w * 0.75, h * 0.55 + i * 5);
+        ctx.lineTo(w * 0.9, h * 0.5 + i * 10);
+        ctx.stroke();
+    }
+}
+
+// 启动眨眼动画
+function startBlinking(ctx) {
+    if (blinkInterval) clearInterval(blinkInterval);
+    blinkInterval = setInterval(() => {
+        eyesOpen = false;
+        drawCat(ctx);
+        setTimeout(() => {
+            eyesOpen = true;
+            drawCat(ctx);
+        }, 200); // 眨眼持续时间
+    }, 4000); // 每4秒眨一次
+}
+
+// 猫咪拖动逻辑
+function makeDraggable(element) {
+    let isDragging = false;
+    let offsetX, offsetY;
+    let hasMoved = false; // 用于区分点击和拖动
+
+    const onMouseDown = (e) => {
+        isDragging = true;
+        hasMoved = false;
+        // 兼容触摸事件
+        const event = e.type === 'touchstart' ? e.touches[0] : e;
+        offsetX = event.clientX - element.offsetLeft;
+        offsetY = event.clientY - element.offsetTop;
+        element.style.transition = 'none'; // 拖动时移除过渡效果
+        // 阻止默认事件，如图片拖动或文本选择
+        e.preventDefault();
+    };
+
+    const onMouseUp = (e) => {
+        isDragging = false;
+        element.style.transition = 'opacity 0.3s ease, transform 0.3s ease'; // 恢复过渡
+        
+        // 如果没有移动，则判定为点击
+        if (!hasMoved) {
+            element.classList.add('tapped');
+            setTimeout(() => {
+                element.classList.remove('tapped');
+            }, 500);
+        }
+    };
+
+    const onMouseMove = (e) => {
+        if (!isDragging) return;
+        hasMoved = true;
+        // 兼容触摸事件
+        const event = e.type === 'touchmove' ? e.touches[0] : e;
+        let newX = event.clientX - offsetX;
+        let newY = event.clientY - offsetY;
+
+        // 边界检测，防止拖出屏幕
+        const maxX = window.innerWidth - element.clientWidth;
+        const maxY = window.innerHeight - element.clientHeight;
+        newX = Math.max(0, Math.min(newX, maxX));
+        newY = Math.max(0, Math.min(newY, maxY));
+
+        element.style.left = `${newX}px`;
+        element.style.top = `${newY}px`;
+        element.style.bottom = 'auto'; // 拖动后需要重置 bottom
+    };
+
+    element.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mousemove', onMouseMove);
+    
+    // 添加触摸事件支持
+    element.addEventListener('touchstart', onMouseDown, { passive: false });
+    document.addEventListener('touchend', onMouseUp);
+    document.addEventListener('touchmove', onMouseMove, { passive: false });
+}
 </script>
 
 </body>
