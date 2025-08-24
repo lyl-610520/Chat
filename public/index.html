@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
     <style>
-        /* --- 默认主题变量 --- */
         :root {
             --bg-color: #f0f2f5;
             --panel-bg: #ffffff;
@@ -22,7 +21,6 @@
             --display-font: 'ZCOOL KuaiLe', cursive;
         }
 
-        /* --- 桐儿生日版 主题变量 --- */
         body[data-theme='cat-theme'] {
             --bg-color: #fdf2f6;
             --panel-bg: rgba(255, 255, 255, 0.85);
@@ -35,7 +33,6 @@
             --private-msg-bg: #f5f3ff;
         }
 
-        /* --- 基础与动画 --- */
         html, body { height: 100%; margin: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; background-color: var(--bg-color); overflow: hidden; transition: background-color 0.5s ease; }
         #chat-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; }
@@ -49,19 +46,17 @@
             100% { transform: translateY(110vh) translateX(-15vw) rotate(-720deg); opacity: 0; }
         }
 
-        /* --- 动态元素：梧桐花、蛋糕、猫咪 --- */
         #special-effects-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
         .flower { position: absolute; background-size: contain; background-repeat: no-repeat; background-image: url('https://api.iconify.design/emojione/fallen-leaf.svg?color=%23c4a484'); animation-timing-function: linear; animation-iteration-count: infinite; }
         .flower.reverse { animation-name: fall-reverse; background-image: url('https://api.iconify.design/emojione/fallen-leaf.svg?color=%23d4b494'); }
         .flower:not(.reverse) { animation-name: fall; }
 
-        /* 【全新】更可爱的漫画风生日蛋糕 */
         #birthday-cake {
             position: fixed;
             z-index: 0;
             right: -20px;
             bottom: -20px;
-            width: 200px; /* 调整尺寸以适应风格 */
+            width: 200px;
             height: 200px;
             background-image: url('https://png.pngtree.com/png-vector/20230411/ourmid/pngtree-birthday-cake-with-three-layers-of-candles-vector-png-image_6697495.png');
             background-size: contain;
@@ -73,31 +68,31 @@
         }
         body[data-theme='cat-theme'] #birthday-cake { opacity: 1; transform: scale(1); }
         
-        /* 【全新】可拖动的猫咪看板娘 */
         #cat-mascot {
-            position: fixed; /* 改为 fixed 以便在视口中拖动 */
+            position: fixed;
             bottom: 20px;
             left: 20px;
-            width: 130px; /* 调整尺寸 */
+            width: 130px;
             height: 130px;
-            /* 【全新】更换为萌萌的漫画猫咪图片 */
             background-image: url('https://png.pngtree.com/png-vector/20230327/ourmid/pngtree-cute-cat-in-a-paper-box-png-image_6668709.png');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            cursor: grab; /* 初始光标样式 */
+            cursor: grab;
             z-index: 101;
             transition: transform 0.3s ease, opacity 0.5s ease;
             opacity: 0;
-            user-select: none; /* 防止拖动时选中文本 */
+            user-select: none;
+            /* 【修复】确保即使主题未加载，元素也是不可见的 */
+            pointer-events: none;
         }
-        #cat-mascot.grabbing {
-            cursor: grabbing; /* 拖动时光标样式 */
-            transform: scale(1.05); /* 拖动时轻微放大 */
+        #cat-mascot.grabbing { cursor: grabbing; transform: scale(1.05); }
+        body[data-theme='cat-theme'] #cat-mascot {
+            opacity: 1;
+            /* 【修复】只有在生日主题下才可交互 */
+            pointer-events: auto;
         }
-        body[data-theme='cat-theme'] #cat-mascot { opacity: 1; }
 
-        /* --- 侧边栏 --- */
         #sidebar { width: 280px; background-color: var(--panel-bg); backdrop-filter: blur(10px); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; transition: all 0.5s ease; position: relative; height: 100%; }
         #sidebar h2 { margin: 0 0 20px 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; flex-shrink: 0; }
         #user-list { list-style-type: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; -webkit-overflow-scrolling: touch; }
@@ -105,13 +100,11 @@
         #user-list li.can-chat:hover { background-color: rgba(0,0,0,0.05); cursor: pointer; }
         #theme-switcher { margin-top: auto; padding-top: 20px; border: none; background: transparent; color: var(--accent-color); cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; flex-shrink: 0; }
 
-        /* --- 聊天主窗口 --- */
         #main-chat { flex-grow: 1; display: flex; flex-direction: column; background-color: transparent; position: relative; height: 100%; }
         #main-chat::before { content: '桐儿生日快乐'; position: absolute; top: 50%; left: 50%; width: 100%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; }
         body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; }
 
-        /* --- 消息气泡 --- */
         #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: -moz-fit-content; width: fit-content; opacity: 0; transform: translateY(20px); animation: slideUp 0.4s forwards; }
         .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); line-height: 1.5; word-break: break-all; }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
@@ -130,13 +123,11 @@
         li.system-message { align-self: center; color: var(--secondary-text); font-style: italic; font-size: 0.9em; }
         .message-sender { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; color: var(--secondary-text); padding: 0 5px; }
         
-        /* --- 输入框 --- */
         #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); backdrop-filter: blur(10px); flex-shrink: 0; }
         #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 10px 18px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
         #input:focus { outline: none; border-color: var(--accent-color); }
         #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; }
         
-        /* --- 登录与移动端适配 --- */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         #login-box { background: var(--panel-bg); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,.1); }
         #login-box input { padding: 12px; font-size: 1.1em; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; }
@@ -160,7 +151,6 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    // --- 元素选取 ---
     const socket = io();
     const body = document.body;
     const loginOverlay = document.getElementById('login-overlay');
@@ -176,41 +166,48 @@
     const catMascot = document.getElementById('cat-mascot');
     let myNickname = '';
 
-    // --- 消息处理器 ---
+    // --- 【重大修复】消息处理器 ---
     const createMessageElement = (data) => {
         const item = document.createElement('li');
+
+        // 【修复】严格区分系统消息和用户消息
+        if (data.type === 'system') {
+            item.className = 'system-message';
+            item.textContent = data.msg;
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
+            return; // 处理完系统消息后直接返回，不再执行后续代码
+        }
+        
+        // --- 以下代码只对用户消息执行 ---
         const sender = document.createElement('span');
         sender.className = 'message-sender';
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
         bubble.textContent = data.msg;
 
-        if (data.type === 'system') { item.className = 'system-message'; item.textContent = data.msg; } 
-        else {
-            if (data.from === myNickname) { item.classList.add('my-message'); } 
-            else { item.classList.add('their-message'); }
+        if (data.from === myNickname) { item.classList.add('my-message'); } 
+        else { item.classList.add('their-message'); }
 
-            if (data.type === 'private') {
-                item.classList.add('private-message');
-                sender.textContent = `[私信] ${data.from} 对 ${data.to} 说:`;
-                item.appendChild(sender);
-            } else if (data.from !== myNickname) {
-                sender.textContent = data.from;
-                item.appendChild(sender);
-            }
+        if (data.type === 'private') {
+            item.classList.add('private-message');
+            sender.textContent = `[私信] ${data.from} 对 ${data.to} 说:`;
+            item.appendChild(sender);
+        } else if (data.from !== myNickname) {
+            sender.textContent = data.from;
+            item.appendChild(sender);
         }
-        item.appendChild(bubble);
+        
+        item.appendChild(bubble); // 只有用户消息才添加气泡
         messages.appendChild(item);
         messages.scrollTop = messages.scrollHeight;
     };
 
-    // --- Socket 事件监听 ---
     socket.on('chat message', (data) => createMessageElement({ ...data, from: data.username, type: 'public' }));
     socket.on('private message', (data) => createMessageElement({ ...data, type: 'private' }));
     socket.on('user joined', (username) => createMessageElement({ msg: `${username} has joined.`, type: 'system' }));
     socket.on('user left', (username) => { if (username) createMessageElement({ msg: `${username} has left.`, type: 'system' }); });
 
-    // --- 更新用户列表 ---
     socket.on('update user list', (users) => {
         userList.innerHTML = '';
         users.forEach(user => {
@@ -228,68 +225,48 @@
         });
     });
 
-    // --- 表单与按钮事件 ---
     loginForm.addEventListener('submit', (e) => { e.preventDefault(); if (nicknameInput.value) { myNickname = nicknameInput.value; socket.emit('new user', myNickname); loginOverlay.style.display = 'none'; input.focus(); } });
     form.addEventListener('submit', (e) => { e.preventDefault(); if (input.value) { socket.emit('chat message', input.value); input.value = ''; } });
     toggleButton.addEventListener('click', () => body.classList.toggle('sidebar-open'));
     
-    // --- 【全新】让猫咪可以被拖动 ---
     function makeDraggable(element) {
         let isDragging = false;
         let offsetX, offsetY;
-
         const startDrag = (e) => {
             isDragging = true;
             element.classList.add('grabbing');
-            // 区分鼠标和触摸事件
             const clientX = e.clientX || e.touches[0].clientX;
             const clientY = e.clientY || e.touches[0].clientY;
-            
             offsetX = clientX - element.getBoundingClientRect().left;
             offsetY = clientY - element.getBoundingClientRect().top;
-
-            // 阻止默认事件，特别是触摸屏的滚动
             e.preventDefault();
         };
-
         const drag = (e) => {
             if (!isDragging) return;
-            
             const clientX = e.clientX || e.touches[0].clientX;
             const clientY = e.clientY || e.touches[0].clientY;
-
             let newLeft = clientX - offsetX;
             let newTop = clientY - offsetY;
-
-            // 边界检测，防止拖出屏幕
             const parent = document.documentElement;
             newLeft = Math.max(0, Math.min(newLeft, parent.clientWidth - element.offsetWidth));
             newTop = Math.max(0, Math.min(newTop, parent.clientHeight - element.offsetHeight));
-
             element.style.left = `${newLeft}px`;
             element.style.top = `${newTop}px`;
+            element.style.bottom = 'auto'; // 【修复】拖动后需要取消bottom定位
+            element.style.right = 'auto'; // 【修复】拖动后需要取消right定位
         };
-
-        const stopDrag = () => {
-            isDragging = false;
-            element.classList.remove('grabbing');
-        };
-
-        // 绑定事件
+        const stopDrag = () => { isDragging = false; element.classList.remove('grabbing'); };
         element.addEventListener('mousedown', startDrag);
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', stopDrag);
-        
-        // 触摸事件支持
         element.addEventListener('touchstart', startDrag, { passive: false });
         document.addEventListener('touchmove', drag, { passive: false });
         document.addEventListener('touchend', stopDrag);
     }
     makeDraggable(catMascot);
 
-
-    // --- 主题与动画逻辑 ---
-    const defaultThemeName = "简约主题";
+    // --- 【修复】主题与动画逻辑 ---
+    const themeOneName = "简约主题"; // 【修复】恢复原始的简约主题名称
     const catThemeName = "桐儿生日版";
 
     function createFallingFlowers() {
@@ -312,24 +289,24 @@
     function applyTheme(theme) {
         if (theme === "cat-theme") {
             body.dataset.theme = "cat-theme";
-            themeSwitcher.innerHTML = `✨ 切换到 ${defaultThemeName}`;
+            themeSwitcher.innerHTML = `✨ 切换到 ${themeOneName}`;
             localStorage.setItem("chat_theme", "cat-theme");
             createFallingFlowers();
         } else {
-            body.dataset.theme = "default";
+            body.dataset.theme = "theme-one"; // 【修复】确保应用正确的主题名称
             themeSwitcher.innerHTML = `✨ 切换到 ${catThemeName}`;
-            localStorage.setItem("chat_theme", "default");
+            localStorage.setItem("chat_theme", "theme-one");
             effectsContainer.innerHTML = "";
         }
     }
 
     themeSwitcher.addEventListener('click', () => {
-        const current = localStorage.getItem('chat_theme') || 'default';
-        applyTheme(current === 'cat-theme' ? 'default' : 'cat-theme');
+        const current = localStorage.getItem('chat_theme') || 'theme-one';
+        applyTheme(current === 'cat-theme' ? 'theme-one' : 'cat-theme');
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-        const saved = localStorage.getItem('chat_theme') || 'default';
+        const saved = localStorage.getItem('chat_theme') || 'theme-one';
         applyTheme(saved);
     });
 </script>
