@@ -337,106 +337,132 @@
         return ctx;
     }
 
-    function drawCake(ctx) {
-        const w = ctx.canvas.width / (window.devicePixelRatio || 1);
-        const h = ctx.canvas.height / (window.devicePixelRatio || 1);
-        ctx.clearRect(0, 0, w * 2, h * 2);
-        
-        ctx.fillStyle = '#E0C9A6';
-        ctx.beginPath();
-        ctx.ellipse(w * 0.5, h * 0.8, w * 0.45, h * 0.1, 0, 0, 2 * Math.PI);
-        ctx.fill();
+  // 请用这个新函数替换掉旧的 drawCake 函数
+function drawCake(ctx) {
+    const w = ctx.canvas.width / (window.devicePixelRatio || 1);
+    const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+    ctx.clearRect(0, 0, w * 2, h * 2);
+    
+    ctx.fillStyle = '#E0C9A6';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.5, h * 0.8, w * 0.45, h * 0.1, 0, 0, 2 * Math.PI);
+    ctx.fill();
 
-        ctx.fillStyle = '#FADADD';
-        ctx.fillRect(w * 0.15, h * 0.6, w * 0.7, h * 0.2);
-        
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(w * 0.15, h * 0.58, w * 0.7, h * 0.05);
+    ctx.fillStyle = '#FADADD';
+    ctx.fillRect(w * 0.15, h * 0.6, w * 0.7, h * 0.2);
+    
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(w * 0.15, h * 0.58, w * 0.7, h * 0.05);
 
-        ctx.fillStyle = '#F3C5C5';
-        ctx.fillRect(w * 0.2, h * 0.4, w * 0.6, h * 0.2);
+    ctx.fillStyle = '#F3C5C5';
+    ctx.fillRect(w * 0.2, h * 0.4, w * 0.6, h * 0.2);
 
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.moveTo(w * 0.2, h * 0.4);
-        ctx.bezierCurveTo(w * 0.3, h * 0.45, w * 0.4, h * 0.35, w * 0.5, h * 0.4);
-        ctx.bezierCurveTo(w * 0.6, h * 0.45, w * 0.7, h * 0.35, w * 0.8, h * 0.4);
-        ctx.lineTo(w * 0.8, h * 0.38);
-        ctx.lineTo(w * 0.2, h * 0.38);
-        ctx.closePath();
-        ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(w * 0.2, h * 0.4);
+    ctx.bezierCurveTo(w * 0.3, h * 0.45, w * 0.4, h * 0.35, w * 0.5, h * 0.4);
+    ctx.bezierCurveTo(w * 0.6, h * 0.45, w * 0.7, h * 0.35, w * 0.8, h * 0.4);
+    ctx.lineTo(w * 0.8, h * 0.38);
+    ctx.lineTo(w * 0.2, h * 0.38);
+    ctx.closePath();
+    ctx.fill();
 
-        ctx.fillStyle = '#DE4C60';
-        ctx.beginPath();
-        ctx.arc(w * 0.5, h * 0.3, w * 0.08, Math.PI, 0);
-        ctx.lineTo(w * 0.5, h * 0.2);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = '#6AAB8E';
-        ctx.beginPath();
-        ctx.arc(w * 0.5, h * 0.3, w * 0.09, Math.PI - 0.5, -0.5);
-        ctx.fill();
+    // 【已修改】将草莓替换为蜡烛
+    const candleX = w * 0.5;
+    const candleY = h * 0.38; // 蜡烛底部位置
+    // 蜡烛主体
+    ctx.fillStyle = '#f0e68c'; // 蜡烛的淡黄色
+    ctx.beginPath();
+    ctx.rect(candleX - w * 0.02, candleY - h * 0.15, w * 0.04, h * 0.15);
+    ctx.fill();
+    
+    // 火焰
+    ctx.fillStyle = '#ffd700'; // 火焰内芯 (黄)
+    ctx.beginPath();
+    ctx.ellipse(candleX, candleY - h * 0.18, w * 0.02, h * 0.04, 0, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 165, 0, 0.7)'; // 火焰外焰 (橙)
+    ctx.beginPath();
+    ctx.ellipse(candleX, candleY - h * 0.17, w * 0.015, h * 0.03, 0, 0, 2 * Math.PI);
+    ctx.fill();
+}
     }
 
-    let eyesOpen = true;
-    function drawCat(ctx) {
-        const w = ctx.canvas.width / (window.devicePixelRatio || 1);
-        const h = ctx.canvas.height / (window.devicePixelRatio || 1);
-        ctx.clearRect(0, 0, w * 2, h * 2);
-        
-        ctx.strokeStyle = '#5D4037';
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+    // --- 请用下面的完整代码块替换您文件中的旧版本 ---
 
-        ctx.fillStyle = '#FFF8E1';
+let eyesOpen = true;
+function drawCat(ctx) {
+    const w = ctx.canvas.width / (window.devicePixelRatio || 1);
+    const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+    ctx.clearRect(0, 0, w * 2, h * 2);
+    
+    ctx.strokeStyle = '#5D4037'; // 深棕色线条
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // 头部轮廓
+    ctx.fillStyle = '#FFF8E1'; // 奶油色
+    const headCenterY = h * 0.55; // 稍微下移头部中心，给耳朵留出空间
+    const headRadius = w * 0.4;
+    ctx.beginPath();
+    ctx.arc(w / 2, headCenterY, headRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 【已修改】耳朵，使其与头部贴合
+    ctx.fillStyle = '#FFCDD2'; // 粉色耳朵
+    const earY = headCenterY - headRadius * 0.8; // 耳朵Y轴位置
+    const earWidth = w * 0.2;
+    // 左耳
+    ctx.beginPath();
+    ctx.moveTo(w * 0.5 - headRadius * 0.7, headCenterY - headRadius * 0.1); // 起点在头部轮廓上
+    ctx.lineTo(w * 0.5 - earWidth, earY);
+    ctx.lineTo(w * 0.5, headCenterY - headRadius * 0.4); // 终点也在头部轮廓附近
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // 右耳
+    ctx.beginPath();
+    ctx.moveTo(w * 0.5 + headRadius * 0.7, headCenterY - headRadius * 0.1);
+    ctx.lineTo(w * 0.5 + earWidth, earY);
+    ctx.lineTo(w * 0.5, headCenterY - headRadius * 0.4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+
+    // 眼睛
+    ctx.fillStyle = '#5D4037';
+    const eyeY = headCenterY - h * 0.05;
+    if (eyesOpen) {
         ctx.beginPath();
-        ctx.moveTo(w*0.1, h*0.5);
-        ctx.bezierCurveTo(w*0.1, h*0.9, w*0.9, h*0.9, w*0.9, h*0.5);
-        ctx.bezierCurveTo(w*0.9, h*0.1, w*0.1, h*0.1, w*0.1, h*0.5);
+        ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2);
+        ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2);
         ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#FFCDD2';
-        const drawEar = (x, side) => {
-            ctx.beginPath();
-            ctx.moveTo(x - w*0.2 * side, h*0.25);
-            ctx.lineTo(x, h*0.05);
-            ctx.lineTo(x + w*0.2 * side, h*0.25);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-        };
-        drawEar(w*0.3, 1);
-        drawEar(w*0.7, -1);
-
-
-        ctx.fillStyle = '#5D4037';
-        const eyeY = h * 0.45;
-        if (eyesOpen) {
-            ctx.beginPath();
-            ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2);
-            ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            ctx.beginPath();
-            ctx.moveTo(w * 0.3, eyeY);
-            ctx.lineTo(w * 0.4, eyeY);
-            ctx.moveTo(w * 0.6, eyeY);
-            ctx.lineTo(w * 0.7, eyeY);
-            ctx.stroke();
-        }
-
+    } else {
         ctx.beginPath();
-        ctx.moveTo(w * 0.45, h * 0.6);
-        ctx.lineTo(w * 0.55, h * 0.6);
-        ctx.moveTo(w * 0.5, h * 0.6);
-        ctx.lineTo(w * 0.5, h * 0.65);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(w * 0.5, h * 0.65, w * 0.15, 0.2 * Math.PI, 0.8 * Math.PI);
+        ctx.moveTo(w * 0.3, eyeY);
+        ctx.lineTo(w * 0.4, eyeY);
+        ctx.moveTo(w * 0.6, eyeY);
+        ctx.lineTo(w * 0.7, eyeY);
         ctx.stroke();
     }
+
+    // 【已修改】嘴巴，整体向上移动
+    const mouthY = headCenterY + h * 0.08;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.45, mouthY); // T字嘴的横线
+    ctx.lineTo(w * 0.55, mouthY);
+    ctx.moveTo(w * 0.5, mouthY); // T字嘴的竖线
+    ctx.lineTo(w * 0.5, mouthY + h * 0.05);
+    ctx.stroke();
+
+    // 微笑弧线
+    ctx.beginPath();
+    ctx.arc(w * 0.5, mouthY + h * 0.05, w * 0.15, 0.2 * Math.PI, 0.8 * Math.PI);
+    ctx.stroke();
+}
     
     function makeDraggable(element) {
         let isDragging = false;
