@@ -22,13 +22,13 @@
             --display-font: 'ZCOOL KuaiLe', cursive;
         }
 
-        /* --- 【全新】桐儿生日版 主题变量 --- */
+        /* --- 桐儿生日版 主题变量 --- */
         body[data-theme='cat-theme'] {
-            --bg-color: #fdf2f6; /* 柔和的粉色背景 */
+            --bg-color: #fdf2f6;
             --panel-bg: rgba(255, 255, 255, 0.85);
-            --accent-color: #ff85a2; /* 甜美的粉色 */
+            --accent-color: #ff85a2;
             --text-color: #4a4a4a;
-            --secondary-text: #a88fb8; /* 温柔的紫色 */
+            --secondary-text: #a88fb8;
             --border-color: #ffc2d4;
             --my-message-bg: #ffb9d4;
             --their-message-bg: #ffffff;
@@ -40,7 +40,6 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; background-color: var(--bg-color); overflow: hidden; transition: background-color 0.5s ease; }
         #chat-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; }
         
-        /* --- 梧桐花飘落动画 --- */
         @keyframes fall {
             0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 1; }
             100% { transform: translateY(110vh) translateX(15vw) rotate(720deg); opacity: 0; }
@@ -50,7 +49,6 @@
             100% { transform: translateY(110vh) translateX(-15vw) rotate(-720deg); opacity: 0; }
         }
 
-        /* --- 动态元素：梧桐花、蛋糕、猫咪 --- */
         #special-effects-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
         .flower {
             position: absolute;
@@ -68,7 +66,7 @@
             animation-name: fall;
         }
 
-        /* --- 【已修正】Canvas 蛋糕样式 --- */
+        /* --- Canvas 蛋糕样式 --- */
         #birthday-cake {
             position: fixed;
             z-index: 0;
@@ -81,16 +79,13 @@
             transition: all 0.8s ease-in-out;
             pointer-events: none;
         }
-        #cake-canvas {
-            width: 100%;
-            height: 100%;
-        }
+        #cake-canvas { width: 100%; height: 100%; }
         body[data-theme='cat-theme'] #birthday-cake {
             opacity: 0.95;
             transform: scale(1);
         }
         
-        /* --- 【已修正】Canvas 猫咪样式 --- */
+        /* --- Canvas 猫咪样式 --- */
         #cat-mascot {
             position: fixed;
             bottom: 20px;
@@ -103,21 +98,13 @@
             opacity: 0;
             pointer-events: none;
         }
-        #cat-canvas {
-            width: 100%;
-            height: 100%;
-        }
+        #cat-canvas { width: 100%; height: 100%; }
         body[data-theme='cat-theme'] #cat-mascot {
             opacity: 1;
             pointer-events: auto;
         }
-        #cat-mascot:active {
-            cursor: grabbing;
-            transform: scale(1.1);
-        }
-        #cat-mascot.tapped {
-            animation: cat-tap-animation 0.5s ease;
-        }
+        #cat-mascot:active { cursor: grabbing; transform: scale(1.1); }
+        #cat-mascot.tapped { animation: cat-tap-animation 0.5s ease; }
         @keyframes cat-tap-animation {
             0% { transform: scale(1.1); }
             50% { transform: scale(0.9) rotate(5deg); }
@@ -143,7 +130,6 @@
         .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); line-height: 1.5; word-break: break-all; }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
-        /* --- 生日版气泡样式 --- */
         body[data-theme='cat-theme'] .message-bubble {
             border: 2px solid #ffdae5;
             box-shadow: 0 4px 12px rgba(255, 133, 162, 0.15);
@@ -152,10 +138,7 @@
         }
         body[data-theme='cat-theme'] .message-bubble::before,
         body[data-theme='cat-theme'] .message-bubble::after {
-            content: '🎀';
-            position: absolute;
-            font-size: 16px;
-            opacity: 0.8;
+            content: '🎀'; position: absolute; font-size: 16px; opacity: 0.8;
         }
         body[data-theme='cat-theme'] .message-bubble::before { top: -10px; left: 15px; transform: rotate(-20deg); }
         body[data-theme='cat-theme'] .message-bubble::after { bottom: -12px; right: 15px; transform: rotate(15deg); }
@@ -185,7 +168,6 @@
 </head>
 <body>
 
-<!-- 【已修改】HTML 结构使用 div 包裹 canvas -->
 <div id="special-effects-container"></div>
 <div id="birthday-cake">
     <canvas id="cake-canvas"></canvas>
@@ -203,7 +185,6 @@
 
 <script src="/socket.io/socket.io.js"></script>
 
-<!-- 【已完全重写】这是最终的、完整功能的脚本 -->
 <script>
     // --- 元素选取 ---
     const socket = io();
@@ -237,11 +218,8 @@
             item.className = 'system-message';
             item.textContent = data.msg;
         } else {
-            if (data.from === myNickname) {
-                item.classList.add('my-message');
-            } else {
-                item.classList.add('their-message');
-            }
+            if (data.from === myNickname) { item.classList.add('my-message'); } 
+            else { item.classList.add('their-message'); }
 
             if (data.type === 'private') {
                 item.classList.add('private-message');
@@ -337,137 +315,121 @@
         return ctx;
     }
 
-  // 请用这个新函数替换掉旧的 drawCake 函数
-function drawCake(ctx) {
-    const w = ctx.canvas.width / (window.devicePixelRatio || 1);
-    const h = ctx.canvas.height / (window.devicePixelRatio || 1);
-    ctx.clearRect(0, 0, w * 2, h * 2);
-    
-    ctx.fillStyle = '#E0C9A6';
-    ctx.beginPath();
-    ctx.ellipse(w * 0.5, h * 0.8, w * 0.45, h * 0.1, 0, 0, 2 * Math.PI);
-    ctx.fill();
+    function drawCake(ctx) {
+        const w = ctx.canvas.width / (window.devicePixelRatio || 1);
+        const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+        ctx.clearRect(0, 0, w * 2, h * 2);
+        
+        ctx.fillStyle = '#E0C9A6';
+        ctx.beginPath();
+        ctx.ellipse(w * 0.5, h * 0.8, w * 0.45, h * 0.1, 0, 0, 2 * Math.PI);
+        ctx.fill();
 
-    ctx.fillStyle = '#FADADD';
-    ctx.fillRect(w * 0.15, h * 0.6, w * 0.7, h * 0.2);
-    
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(w * 0.15, h * 0.58, w * 0.7, h * 0.05);
+        ctx.fillStyle = '#FADADD';
+        ctx.fillRect(w * 0.15, h * 0.6, w * 0.7, h * 0.2);
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(w * 0.15, h * 0.58, w * 0.7, h * 0.05);
 
-    ctx.fillStyle = '#F3C5C5';
-    ctx.fillRect(w * 0.2, h * 0.4, w * 0.6, h * 0.2);
+        ctx.fillStyle = '#F3C5C5';
+        ctx.fillRect(w * 0.2, h * 0.4, w * 0.6, h * 0.2);
 
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.moveTo(w * 0.2, h * 0.4);
-    ctx.bezierCurveTo(w * 0.3, h * 0.45, w * 0.4, h * 0.35, w * 0.5, h * 0.4);
-    ctx.bezierCurveTo(w * 0.6, h * 0.45, w * 0.7, h * 0.35, w * 0.8, h * 0.4);
-    ctx.lineTo(w * 0.8, h * 0.38);
-    ctx.lineTo(w * 0.2, h * 0.38);
-    ctx.closePath();
-    ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.moveTo(w * 0.2, h * 0.4);
+        ctx.bezierCurveTo(w * 0.3, h * 0.45, w * 0.4, h * 0.35, w * 0.5, h * 0.4);
+        ctx.bezierCurveTo(w * 0.6, h * 0.45, w * 0.7, h * 0.35, w * 0.8, h * 0.4);
+        ctx.lineTo(w * 0.8, h * 0.38);
+        ctx.lineTo(w * 0.2, h * 0.38);
+        ctx.closePath();
+        ctx.fill();
 
-    // 【已修改】将草莓替换为蜡烛
-    const candleX = w * 0.5;
-    const candleY = h * 0.38; // 蜡烛底部位置
-    // 蜡烛主体
-    ctx.fillStyle = '#f0e68c'; // 蜡烛的淡黄色
-    ctx.beginPath();
-    ctx.rect(candleX - w * 0.02, candleY - h * 0.15, w * 0.04, h * 0.15);
-    ctx.fill();
-    
-    // 火焰
-    ctx.fillStyle = '#ffd700'; // 火焰内芯 (黄)
-    ctx.beginPath();
-    ctx.ellipse(candleX, candleY - h * 0.18, w * 0.02, h * 0.04, 0, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255, 165, 0, 0.7)'; // 火焰外焰 (橙)
-    ctx.beginPath();
-    ctx.ellipse(candleX, candleY - h * 0.17, w * 0.015, h * 0.03, 0, 0, 2 * Math.PI);
-    ctx.fill();
-}
+        const candleX = w * 0.5;
+        const candleY = h * 0.38;
+        ctx.fillStyle = '#f0e68c';
+        ctx.beginPath();
+        ctx.rect(candleX - w * 0.02, candleY - h * 0.15, w * 0.04, h * 0.15);
+        ctx.fill();
+        
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath();
+        ctx.ellipse(candleX, candleY - h * 0.18, w * 0.02, h * 0.04, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 165, 0, 0.7)';
+        ctx.beginPath();
+        ctx.ellipse(candleX, candleY - h * 0.17, w * 0.015, h * 0.03, 0, 0, 2 * Math.PI);
+        ctx.fill();
     }
 
-    // --- 请用下面的完整代码块替换您文件中的旧版本 ---
+    let eyesOpen = true;
+    function drawCat(ctx) {
+        const w = ctx.canvas.width / (window.devicePixelRatio || 1);
+        const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+        ctx.clearRect(0, 0, w * 2, h * 2);
+        
+        ctx.strokeStyle = '#5D4037';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
-let eyesOpen = true;
-function drawCat(ctx) {
-    const w = ctx.canvas.width / (window.devicePixelRatio || 1);
-    const h = ctx.canvas.height / (window.devicePixelRatio || 1);
-    ctx.clearRect(0, 0, w * 2, h * 2);
-    
-    ctx.strokeStyle = '#5D4037'; // 深棕色线条
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // 头部轮廓
-    ctx.fillStyle = '#FFF8E1'; // 奶油色
-    const headCenterY = h * 0.55; // 稍微下移头部中心，给耳朵留出空间
-    const headRadius = w * 0.4;
-    ctx.beginPath();
-    ctx.arc(w / 2, headCenterY, headRadius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // 【已修改】耳朵，使其与头部贴合
-    ctx.fillStyle = '#FFCDD2'; // 粉色耳朵
-    const earY = headCenterY - headRadius * 0.8; // 耳朵Y轴位置
-    const earWidth = w * 0.2;
-    // 左耳
-    ctx.beginPath();
-    ctx.moveTo(w * 0.5 - headRadius * 0.7, headCenterY - headRadius * 0.1); // 起点在头部轮廓上
-    ctx.lineTo(w * 0.5 - earWidth, earY);
-    ctx.lineTo(w * 0.5, headCenterY - headRadius * 0.4); // 终点也在头部轮廓附近
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    // 右耳
-    ctx.beginPath();
-    ctx.moveTo(w * 0.5 + headRadius * 0.7, headCenterY - headRadius * 0.1);
-    ctx.lineTo(w * 0.5 + earWidth, earY);
-    ctx.lineTo(w * 0.5, headCenterY - headRadius * 0.4);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-
-    // 眼睛
-    ctx.fillStyle = '#5D4037';
-    const eyeY = headCenterY - h * 0.05;
-    if (eyesOpen) {
+        ctx.fillStyle = '#FFF8E1';
+        const headCenterY = h * 0.55;
+        const headRadius = w * 0.4;
         ctx.beginPath();
-        ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2);
-        ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2);
+        ctx.arc(w / 2, headCenterY, headRadius, 0, Math.PI * 2);
         ctx.fill();
-    } else {
+        ctx.stroke();
+
+        ctx.fillStyle = '#FFCDD2';
+        const earY = headCenterY - headRadius * 0.8;
+        const earWidth = w * 0.2;
         ctx.beginPath();
-        ctx.moveTo(w * 0.3, eyeY);
-        ctx.lineTo(w * 0.4, eyeY);
-        ctx.moveTo(w * 0.6, eyeY);
-        ctx.lineTo(w * 0.7, eyeY);
+        ctx.moveTo(w * 0.5 - headRadius * 0.7, headCenterY - headRadius * 0.1);
+        ctx.lineTo(w * 0.5 - earWidth, earY);
+        ctx.lineTo(w * 0.5, headCenterY - headRadius * 0.4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(w * 0.5 + headRadius * 0.7, headCenterY - headRadius * 0.1);
+        ctx.lineTo(w * 0.5 + earWidth, earY);
+        ctx.lineTo(w * 0.5, headCenterY - headRadius * 0.4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#5D4037';
+        const eyeY = headCenterY - h * 0.05;
+        if (eyesOpen) {
+            ctx.beginPath();
+            ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2);
+            ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(w * 0.3, eyeY);
+            ctx.lineTo(w * 0.4, eyeY);
+            ctx.moveTo(w * 0.6, eyeY);
+            ctx.lineTo(w * 0.7, eyeY);
+            ctx.stroke();
+        }
+
+        const mouthY = headCenterY + h * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.45, mouthY);
+        ctx.lineTo(w * 0.55, mouthY);
+        ctx.moveTo(w * 0.5, mouthY);
+        ctx.lineTo(w * 0.5, mouthY + h * 0.05);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(w * 0.5, mouthY + h * 0.05, w * 0.15, 0.2 * Math.PI, 0.8 * Math.PI);
         ctx.stroke();
     }
-
-    // 【已修改】嘴巴，整体向上移动
-    const mouthY = headCenterY + h * 0.08;
-    ctx.beginPath();
-    ctx.moveTo(w * 0.45, mouthY); // T字嘴的横线
-    ctx.lineTo(w * 0.55, mouthY);
-    ctx.moveTo(w * 0.5, mouthY); // T字嘴的竖线
-    ctx.lineTo(w * 0.5, mouthY + h * 0.05);
-    ctx.stroke();
-
-    // 微笑弧线
-    ctx.beginPath();
-    ctx.arc(w * 0.5, mouthY + h * 0.05, w * 0.15, 0.2 * Math.PI, 0.8 * Math.PI);
-    ctx.stroke();
-}
     
     function makeDraggable(element) {
-        let isDragging = false;
-        let hasMoved = false;
-        let offsetX, offsetY;
+        let isDragging = false, hasMoved = false, offsetX, offsetY;
 
         function onStart(e) {
             isDragging = true;
