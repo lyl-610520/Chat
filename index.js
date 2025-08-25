@@ -7,80 +7,88 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
-
-// 存储在线用户
-const usersBySocketId = {}; // 通过 socket.id 找 username
-const socketsByUsername = {}; // 通过 username 找 socket.id
+// 【新增】从环境变量读取房间密码，如果没有则使用 '123' 作为默认密码
+const ROOM_PASSWORD = process.env.ROOM_PASSWORD || '123';
 
 // 提供前端静态文件
 app.use(express.static('public'));
 
+// 获取当前所有在线用户的列表
+function getOnlineUsers() {
+    const users = [];
+    // io.sockets.sockets 是一个 Map，存储了所有连接的 socket
+    for (const [id, socket] of io.sockets.sockets) {
+        if (socket.username) {
+            users.push(socket.username);
+        }
+    }
+    return users;
+}
+
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  // 【已修改】监听新用户加入，增加昵称重复检查
-  socket.on('new user', (username) => {
+  // 【已重构】监听新用户加入，增加密码验证和全新的用户状态管理
+  socket.on('new user', (data) => {
+    // 验证密码
+    if (data.password !== ROOM_PASSWORD) {
+        socket.emit('login failed', '房间密码错误！');
+        return;
+    }
     // 检查用户名是否已经被使用
-    if (socketsByUsername[username]) {
-      // 如果存在，向该请求的客户端发送一个失败事件
+    if (getOnlineUsers().includes(data.username)) {
       socket.emit('nickname taken');
-      return; // 阻止后续代码执行
+      return;
     }
 
-    // 如果用户名可用，则走正常流程
-    usersBySocketId[socket.id] = username;
-    socketsByUsername[username] = socket.id;
+    // 验证通过，将用户名直接附加到 socket 对象上
+    socket.username = data.username;
 
-    // 通知该客户端登录成功
     socket.emit('login success');
-    
-    // 向所有其他客户端广播新用户加入
-    socket.broadcast.emit('user joined', username);
-    // 向所有客户端更新用户列表
-    io.emit('update user list', Object.values(usersBySocketId));
+    socket.broadcast.emit('user joined', socket.username);
+    io.emit('update user list', getOnlineUsers());
   });
 
-  // 监听公共聊天消息
+  // 【已重构】监听公共聊天消息，从 socket 对象获取用户名
   socket.on('chat message', (msg) => {
-    const username = usersBySocketId[socket.id] || 'Anonymous';
-    io.emit('chat message', { username, msg });
-  });
-
-  // 监听私聊消息
-  socket.on('private message', (data) => {
-    const fromUser = usersBySocketId[socket.id];
-    const targetSocketId = socketsByUsername[data.to];
-
-    if (fromUser && targetSocketId) {
-      // 发送给目标用户
-      io.to(targetSocketId).emit('private message', {
-        from: fromUser,
-        to: data.to,
-        msg: data.msg
-      });
-      // 也发送给自己，让自己能看到已发送的私信
-      io.to(socket.id).emit('private message', {
-        from: fromUser,
-        to: data.to,
-        msg: data.msg
-      });
+    if (socket.username) {
+        io.emit('chat message', { username: socket.username, msg });
     }
   });
 
-  // 监听用户断开连接
+  // 【已重构】监听私聊消息，通过遍历 socket 查找目标用户
+  socket.on('private message', (data) => {
+    if (!socket.username) return;
+
+    let targetSocket = null;
+    for (const [id, sk] of io.sockets.sockets) {
+        if (sk.username === data.to) {
+            targetSocket = sk;
+            break;
+        }
+    }
+
+    if (targetSocket) {
+      const messageData = {
+          from: socket.username,
+          to: data.to,
+          msg: data.msg
+      };
+      targetSocket.emit('private message', messageData);
+      socket.emit('private message', messageData); // 也发给自己
+    }
+  });
+
+  // 【已重构】监听用户断开连接，从 socket 对象获取用户名
   socket.on('disconnect', () => {
-    const username = usersBySocketId[socket.id];
-    if (username) {
-      console.log('User disconnected:', username);
-      delete usersBySocketId[socket.id];
-      delete socketsByUsername[username];
-      
-      io.emit('user left', username);
-      io.emit('update user list', Object.values(usersBySocketId));
+    if (socket.username) {
+      console.log('User disconnected:', socket.username);
+      io.emit('user left', socket.username);
+      io.emit('update user list', getOnlineUsers());
     }
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}. Room password is: ${ROOM_PASSWORD}`);
 });
