@@ -52,7 +52,19 @@
         #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: fit-content; opacity: 0; animation: slideUp 0.4s forwards; }
         .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); word-break: break-all; }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-        body[data-theme='cat-theme'] .message-bubble { border: 2px solid #ffdae5; }
+        /* 【已修正】恢复了生日主题下气泡的边框、阴影、相对定位和蝴蝶结样式 */
+        body[data-theme='cat-theme'] .message-bubble {
+            border: 2px solid #ffdae5;
+            box-shadow: 0 4px 12px rgba(255, 133, 162, 0.15);
+            position: relative;
+            padding: 15px 25px;
+        }
+        body[data-theme='cat-theme'] .message-bubble::before,
+        body[data-theme='cat-theme'] .message-bubble::after {
+            content: '🎀'; position: absolute; font-size: 16px; opacity: 0.8;
+        }
+        body[data-theme='cat-theme'] .message-bubble::before { top: -10px; left: 15px; transform: rotate(-20deg); }
+        body[data-theme='cat-theme'] .message-bubble::after { bottom: -12px; right: 15px; transform: rotate(15deg); }
         li.my-message { align-self: flex-end; align-items: flex-end; }
         li.their-message { align-self: flex-start; align-items: flex-start; }
         .my-message .message-bubble { background: var(--my-message-bg); color: #fff; }
@@ -67,16 +79,15 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.3s ease; }
         .overlay.visible { visibility: visible; opacity: 1; }
         .modal-box { background: var(--panel-bg); padding: 30px 40px; border-radius: 12px; text-align: center; }
-        .modal-box input { display: block; width: 220px; padding: 12px; font-size: 1.1em; border: 1px solid var(--border-color); border-radius: 8px; margin: 15px auto; }
+        .modal-box input { display: block; width: 100%; box-sizing: border-box; padding: 12px; font-size: 1.1em; border: 1px solid var(--border-color); border-radius: 8px; margin: 15px auto; }
         .modal-box .button-group { display: flex; justify-content: center; gap: 10px; margin-top: 10px;}
         .modal-box button { padding: 12px 25px; font-size: 1.1em; border: none; border-radius: 8px; cursor: pointer; }
         .modal-box .primary-btn { background: var(--accent-color); color: white; }
         .modal-box .secondary-btn { background: #ccc; }
-        /* 【新增】点赞功能的样式 */
+        #share-room-overlay p { margin-top: 0; }
         .likes-container { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; padding: 0 5px; max-width: 100%; }
         .like-heart { font-size: 0.8em; background-color: rgba(0, 0, 0, 0.05); padding: 2px 8px; border-radius: 10px; color: var(--secondary-text); }
         .like-heart.my-like { background-color: #ffe0e0; cursor: pointer; }
-
         @media (max-width: 768px) { #sidebar { position: fixed; left:0; top:0; width:80%; max-width:300px; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease-in-out; } body.sidebar-open #sidebar { transform: translateX(0); } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size:20px; } }
         @media (min-width: 769px) { #toggle-users { display: none; } }
     </style>
@@ -107,6 +118,19 @@
                 <button type="button" class="secondary-btn" data-close>取消</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- 【新增】创建成功后用于分享链接的模态框 -->
+<div id="share-room-overlay" class="overlay">
+    <div class="modal-box">
+        <h2>创建成功！</h2>
+        <p>复制下面的链接分享给你的朋友：</p>
+        <input type="text" id="room-link-input" readonly>
+        <div class="button-group" style="margin-top: 20px;">
+             <button type="button" id="copy-link-btn" class="secondary-btn">复制链接</button>
+             <button type="button" id="join-now-btn" class="primary-btn">立即加入</button>
+        </div>
     </div>
 </div>
 
@@ -177,7 +201,10 @@
     const createRoomBtn = document.getElementById('create-room-btn');
     const joinRoomBtn = document.getElementById('join-room-btn');
     const toggleButton = document.getElementById('toggle-users');
+    const copyLinkBtn = document.getElementById('copy-link-btn');
+    const joinNowBtn = document.getElementById('join-now-btn');
     const createRoomOverlay = document.getElementById('create-room-overlay');
+    const shareRoomOverlay = document.getElementById('share-room-overlay');
     const joinRoomOverlay = document.getElementById('join-room-overlay');
     const loginOverlay = document.getElementById('login-overlay');
     const pmOverlay = document.getElementById('pm-overlay');
@@ -188,6 +215,7 @@
     const form = document.getElementById('form');
     const createRoomNameInput = document.getElementById('create-room-name');
     const createRoomPasswordInput = document.getElementById('create-room-password');
+    const roomLinkInput = document.getElementById('room-link-input');
     const joinRoomIdInput = document.getElementById('join-room-id');
     const nicknameInput = document.getElementById('nickname-input');
     const passwordInput = document.getElementById('password-input');
@@ -206,7 +234,7 @@
     const cakeCanvas = document.getElementById('cake-canvas');
 
     // --- 通用函数 ---
-    function showOverlay(overlay) { overlay.classList.add('visible'); }
+    function showOverlay(overlay) { hideOverlays(); overlay.classList.add('visible'); }
     function hideOverlays() { overlays.forEach(o => o.classList.remove('visible')); }
 
     // --- 页面初始化与URL处理 ---
@@ -229,6 +257,20 @@
         });
     });
 
+    copyLinkBtn.addEventListener('click', () => {
+        roomLinkInput.select();
+        try {
+            document.execCommand('copy');
+            alert('链接已复制!');
+        } catch (err) {
+            alert('复制失败，请手动复制。');
+        }
+    });
+
+    joinNowBtn.addEventListener('click', () => {
+        location.href = roomLinkInput.value;
+    });
+
     createRoomForm.addEventListener('submit', e => { e.preventDefault(); socket.emit('create room', { roomName: createRoomNameInput.value.trim(), password: createRoomPasswordInput.value }); });
     joinRoomForm.addEventListener('submit', e => { e.preventDefault(); let id = joinRoomIdInput.value.trim(); try { id = new URL(id).searchParams.get('room') || id; } catch (_) {} if(id) { location.href = `${location.origin}${location.pathname}?room=${id}`; } });
     loginForm.addEventListener('submit', e => { e.preventDefault(); const username = nicknameInput.value.trim(); if (username) { loginForm.querySelector('button').disabled = true; socket.emit('join room', { roomId: currentRoomId, username, password: passwordInput.value }); } });
@@ -237,8 +279,10 @@
     toggleButton.addEventListener('click', () => body.classList.toggle('sidebar-open'));
 
     // --- Socket.IO 事件监听 ---
+    // 【已修改】创建房间成功后，显示分享模态框
     socket.on('room created', (roomId) => {
-        location.href = `${location.origin}${location.pathname}?room=${roomId}`;
+        roomLinkInput.value = `${location.origin}${location.pathname}?room=${roomId}`;
+        showOverlay(shareRoomOverlay);
     });
 
     socket.on('room exists', (data) => {
@@ -362,7 +406,7 @@
         });
     }
 
-    // --- Canvas 绘图与交互逻辑 (已恢复原始格式) ---
+    // --- Canvas 绘图与交互逻辑 ---
     function setupCanvas(canvas) {
         const dpr = window.devicePixelRatio || 1;
         const rect = canvas.parentElement.getBoundingClientRect();
@@ -534,7 +578,7 @@
         document.addEventListener('touchmove', onMove, { passive: false });
     }
 
-    // --- 主题与动画逻辑 (已恢复原始格式) ---
+    // --- 主题与动画逻辑 ---
     const defaultThemeName = "简约主题";
     const catThemeName = "桐儿生日版";
     let blinkInterval;
