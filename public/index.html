@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gem's Private Chat Room</title>
+    <title>EE鸦鸦 Chat Room</title>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,7 +49,7 @@
         #main-chat::before { content: '桐儿生日快乐'; position: absolute; top: 50%; left: 50%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: -1; opacity: 0; transition: opacity 0.8s ease; pointer-events:none; }
         body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; display: flex; flex-direction: column; }
-        #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: fit-content; opacity: 0; animation: slideUp 0.4s forwards; }
+        #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: -moz-fit-content; width: fit-content; opacity: 0; animation: slideUp 0.4s forwards; }
         .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); word-break: break-all; }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
         /* 【已修正】恢复了生日主题下气泡的边框、阴影、相对定位和蝴蝶结样式 */
@@ -344,6 +344,38 @@
             renderLikes(container, likes, messageId);
         }
     });
+        // --- 【新增】网络状态处理 ---
+    socket.on('disconnect', (reason) => {
+        // 创建一个提示消息
+        const item = document.createElement('li');
+        item.id = 'reconnecting-message'; // 给它一个ID，方便之后移除
+        item.className = 'system-message';
+        item.textContent = '⚠️ 网络连接已断开，正在尝试重连...';
+        messages.appendChild(item);
+        messages.scrollTop = messages.scrollHeight;
+
+        // 禁用输入框
+        input.disabled = true;
+        form.querySelector('button').disabled = true;
+    });
+
+    socket.on('connect', () => {
+        // 如果页面中存在重连提示，说明是断线后重连成功的
+        const reconnectingMsg = document.getElementById('reconnecting-message');
+        if (reconnectingMsg) {
+            reconnectingMsg.remove(); // 移除“正在重连”的提示
+
+            const item = document.createElement('li');
+            item.className = 'system-message';
+            item.innerHTML = '✅ 已重新连接。<br>为确保您的身份，请<strong>刷新页面</strong>重新加入房间。';
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
+            
+            // 保持输入框禁用，强制用户刷新
+            input.disabled = true;
+            form.querySelector('button').disabled = true;
+        }
+    });
 
     // --- 消息与点赞渲染 ---
     function createMessageElement(data) {
@@ -360,16 +392,19 @@
             if (data.from === myNickname) { li.classList.add('my-message'); } 
             else { li.classList.add('their-message'); }
 
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = data.msg;
+
+            // 调整逻辑：先处理发送者信息
             if (data.type === 'private') {
                 li.classList.add('private-message');
                 sender.textContent = `[私信] ${data.from} 对 ${data.to}:`;
-            } else {
+                li.appendChild(sender); // 私信总是显示发送者
+            } else if (data.from !== myNickname) {
                 sender.textContent = data.from;
+                li.appendChild(sender); // 公开消息只显示别人的名字
             }
-
-            if (data.from !== myNickname) li.appendChild(sender);
-
-            const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
             bubble.textContent = data.msg;
             bubble.addEventListener('dblclick', () => socket.emit('toggle like', data.id));
@@ -464,17 +499,19 @@
     }
 
     let eyesOpen = true;
+        // --- 【全新修正】绘制猫咪的函数 ---
     function drawCat(ctx) {
         const w = ctx.canvas.width / (window.devicePixelRatio || 1);
         const h = ctx.canvas.height / (window.devicePixelRatio || 1);
         ctx.clearRect(0, 0, w * 2, h * 2);
     
-        ctx.strokeStyle = '#5D4037';
+        ctx.strokeStyle = '#5D4037'; // 猫咪轮廓颜色
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        ctx.fillStyle = '#FFF8E1';
+        // --- 头部 ---
+        ctx.fillStyle = '#FFF8E1'; // 猫咪脸部颜色
         const headCenterX = w / 2;
         const headCenterY = h * 0.55;
         const headRadius = w * 0.4;
@@ -483,32 +520,54 @@
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = '#FFCDD2';
-
+        // --- 耳朵 (使用更精确和对称的坐标) ---
+        
+        // 左耳外轮廓
         ctx.beginPath();
-        ctx.moveTo(headCenterX - headRadius * 0.7, headCenterY - headRadius * 0.2);
-        ctx.lineTo(headCenterX - headRadius * 0.3, headCenterY - headRadius * 1.2);
-        ctx.lineTo(headCenterX + headRadius * 0.1, headCenterY - headRadius * 0.7);
+        ctx.moveTo(headCenterX - headRadius * 0.25, headCenterY - headRadius * 0.85); // 内侧点 (靠近中心)
+        ctx.lineTo(headCenterX - headRadius * 0.5, headCenterY - headRadius * 1.3);  // 顶点 (最高点)
+        ctx.lineTo(headCenterX - headRadius * 0.75, headCenterY - headRadius * 0.75); // 外侧点 (远离中心)
+        ctx.closePath();
+        ctx.fillStyle = '#FFF8E1'; // 和脸一个颜色
+        ctx.fill();
+        ctx.stroke();
+        
+        // 右耳外轮廓 (与左耳X轴对称)
+        ctx.beginPath();
+        ctx.moveTo(headCenterX + headRadius * 0.25, headCenterY - headRadius * 0.85); // 内侧点
+        ctx.lineTo(headCenterX + headRadius * 0.5, headCenterY - headRadius * 1.3);  // 顶点
+        ctx.lineTo(headCenterX + headRadius * 0.75, headCenterY - headRadius * 0.75); // 外侧点
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
+        // 左耳内粉色
         ctx.beginPath();
-        ctx.moveTo(headCenterX + headRadius * 0.7, headCenterY - headRadius * 0.2);
-        ctx.lineTo(headCenterX + headRadius * 0.3, headCenterY - headRadius * 1.2);
-        ctx.lineTo(headCenterX - headRadius * 0.1, headCenterY - headRadius * 0.7);
+        ctx.moveTo(headCenterX - headRadius * 0.3, headCenterY - headRadius * 0.8);
+        ctx.lineTo(headCenterX - headRadius * 0.48, headCenterY - headRadius * 1.15);
+        ctx.lineTo(headCenterX - headRadius * 0.65, headCenterY - headRadius * 0.75);
+        ctx.closePath();
+        ctx.fillStyle = '#FFCDD2'; // 粉色
+        ctx.fill();
+
+        // 右耳内粉色
+        ctx.beginPath();
+        ctx.moveTo(headCenterX + headRadius * 0.3, headCenterY - headRadius * 0.8);
+        ctx.lineTo(headCenterX + headRadius * 0.48, headCenterY - headRadius * 1.15);
+        ctx.lineTo(headCenterX + headRadius * 0.65, headCenterY - headRadius * 0.75);
         ctx.closePath();
         ctx.fill();
-        ctx.stroke();
 
-        ctx.fillStyle = '#5D4037';
+
+        // --- 眼睛 ---
+        ctx.fillStyle = '#5D4037'; // 眼睛颜色
         const eyeY = headCenterY - h * 0.05;
         if (eyesOpen) {
             ctx.beginPath();
-            ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2);
-            ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2);
+            ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2); // 左眼
+            ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2); // 右眼
             ctx.fill();
-        } else {
+        } else { // 眨眼
             ctx.beginPath();
             ctx.moveTo(w * 0.3, eyeY);
             ctx.lineTo(w * 0.4, eyeY);
@@ -517,6 +576,7 @@
             ctx.stroke();
         }
 
+        // --- 嘴巴 ---
         const mouthY = headCenterY + h * 0.08;
         ctx.beginPath();
         ctx.moveTo(w * 0.45, mouthY);
