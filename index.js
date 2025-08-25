@@ -9,7 +9,7 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
-// 【已重构】用一个对象来存储所有房间的信息
+// 用一个对象来存储所有房间的信息
 const rooms = {};
 
 // 提供前端静态文件
@@ -17,18 +17,19 @@ app.use(express.static('public'));
 
 io.on('connection', (socket) => {
   
-  // 【新增】创建新房间
+  // 创建新房间
   socket.on('create room', (data) => {
-    const roomId = nanoid(6); // 生成一个6位的随机房间ID
+    const roomId = nanoid(6); 
     rooms[roomId] = {
       name: data.roomName,
-      password: data.password, // 如果密码为空字符串，则为公开房间
-      users: {}
+      password: data.password,
+      users: {},
+      messages: [] // 【新增】用于存储消息，为点赞功能服务
     };
     socket.emit('room created', roomId);
   });
 
-  // 【新增】检查房间是否存在和密码是否正确
+  // 检查房间是否存在和密码是否正确
   socket.on('join check', (roomId) => {
     if (rooms[roomId]) {
       socket.emit('room exists', {
@@ -40,12 +41,11 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 【已重构】用户加入房间
+  // 用户加入房间
   socket.on('join room', (data) => {
     const { roomId, username, password } = data;
     const room = rooms[roomId];
 
-    // 各种验证
     if (!room) {
       return socket.emit('login failed', '房间不存在或已解散。');
     }
@@ -56,27 +56,64 @@ io.on('connection', (socket) => {
       return socket.emit('nickname taken');
     }
 
-    // 验证通过
-    socket.join(roomId); // 让 socket 加入 Socket.IO 的房间
-    socket.roomId = roomId; // 在 socket 上存储房间ID
-    socket.username = username; // 在 socket 上存储用户名
-    room.users[socket.id] = username; // 在我们的房间对象里也存一份
+    socket.join(roomId);
+    socket.roomId = roomId;
+    socket.username = username;
+    room.users[socket.id] = username;
 
     socket.emit('login success', room.name);
 
-    // 【关键】只向该房间广播消息
     socket.to(roomId).emit('user joined', username);
     io.to(roomId).emit('update user list', Object.values(room.users));
   });
 
-  // 【已重构】处理聊天消息
+  // 【已修改】处理聊天消息，为其增加唯一ID和点赞列表
   socket.on('chat message', (msg) => {
     if (socket.username && socket.roomId) {
-      io.to(socket.roomId).emit('chat message', { username: socket.username, msg });
+        const room = rooms[socket.roomId];
+        if (room) {
+            const messageData = {
+                id: nanoid(8), // 为消息生成一个8位数的唯一ID
+                username: socket.username,
+                msg,
+                likes: [] // 初始化一个空数组来存放点赞的用户
+            };
+            
+            if (!room.messages) room.messages = [];
+            room.messages.push(messageData); // 将消息存入房间历史记录
+
+            io.to(socket.roomId).emit('chat message', messageData); // 广播完整的消息对象
+        }
     }
   });
 
-  // 【已重构】处理私信
+  // 【新增】处理点赞/取消点赞逻辑
+  socket.on('toggle like', (messageId) => {
+    if (socket.username && socket.roomId) {
+        const room = rooms[socket.roomId];
+        // 确保房间和消息历史存在
+        if (room && room.messages) {
+            const message = room.messages.find(m => m.id === messageId);
+            if (message) {
+                const userIndex = message.likes.indexOf(socket.username);
+                if (userIndex > -1) {
+                    // 如果用户已点赞，则移除用户名，实现取消点赞
+                    message.likes.splice(userIndex, 1);
+                } else {
+                    // 如果用户未点赞，则添加用户名
+                    message.likes.push(socket.username);
+                }
+                // 向房间内所有客户端广播这条消息的点赞更新
+                io.to(socket.roomId).emit('update likes', {
+                    messageId: message.id,
+                    likes: message.likes
+                });
+            }
+        }
+    }
+  });
+
+  // 处理私信
   socket.on('private message', (data) => {
     const { to, msg } = data;
     const room = rooms[socket.roomId];
@@ -97,18 +134,16 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 【已重构】处理断开连接
+  // 处理断开连接
   socket.on('disconnect', () => {
     if (socket.username && socket.roomId) {
       const room = rooms[socket.roomId];
-      if (room) {
+      if (room && room.users[socket.id]) { // 增加一个判断，防止出错
         delete room.users[socket.id];
-        // 如果房间空了，可以选择解散房间
         if (Object.keys(room.users).length === 0) {
           delete rooms[socket.roomId];
           console.log(`Room ${socket.roomId} is empty and has been closed.`);
         } else {
-          // 否则，更新房间内的用户列表
           io.to(socket.roomId).emit('user left', socket.username);
           io.to(socket.roomId).emit('update user list', Object.values(room.users));
         }
