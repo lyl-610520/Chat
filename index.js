@@ -1,94 +1,122 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
+const { nanoid } = require('nanoid');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
-// 【新增】从环境变量读取房间密码，如果没有则使用 '123' 作为默认密码
-const ROOM_PASSWORD = process.env.ROOM_PASSWORD || '123';
+
+// 【已重构】用一个对象来存储所有房间的信息
+const rooms = {};
 
 // 提供前端静态文件
 app.use(express.static('public'));
 
-// 获取当前所有在线用户的列表
-function getOnlineUsers() {
-    const users = [];
-    // io.sockets.sockets 是一个 Map，存储了所有连接的 socket
-    for (const [id, socket] of io.sockets.sockets) {
-        if (socket.username) {
-            users.push(socket.username);
-        }
-    }
-    return users;
-}
-
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
-
-  // 【已重构】监听新用户加入，增加密码验证和全新的用户状态管理
-  socket.on('new user', (data) => {
-    // 验证密码
-    if (data.password !== ROOM_PASSWORD) {
-        socket.emit('login failed', '房间密码错误！');
-        return;
-    }
-    // 检查用户名是否已经被使用
-    if (getOnlineUsers().includes(data.username)) {
-      socket.emit('nickname taken');
-      return;
-    }
-
-    // 验证通过，将用户名直接附加到 socket 对象上
-    socket.username = data.username;
-
-    socket.emit('login success');
-    socket.broadcast.emit('user joined', socket.username);
-    io.emit('update user list', getOnlineUsers());
+  
+  // 【新增】创建新房间
+  socket.on('create room', (data) => {
+    const roomId = nanoid(6); // 生成一个6位的随机房间ID
+    rooms[roomId] = {
+      name: data.roomName,
+      password: data.password, // 如果密码为空字符串，则为公开房间
+      users: {}
+    };
+    socket.emit('room created', roomId);
   });
 
-  // 【已重构】监听公共聊天消息，从 socket 对象获取用户名
+  // 【新增】检查房间是否存在和密码是否正确
+  socket.on('join check', (roomId) => {
+    if (rooms[roomId]) {
+      socket.emit('room exists', {
+        name: rooms[roomId].name,
+        hasPassword: !!rooms[roomId].password
+      });
+    } else {
+      socket.emit('room not found');
+    }
+  });
+
+  // 【已重构】用户加入房间
+  socket.on('join room', (data) => {
+    const { roomId, username, password } = data;
+    const room = rooms[roomId];
+
+    // 各种验证
+    if (!room) {
+      return socket.emit('login failed', '房间不存在或已解散。');
+    }
+    if (room.password && room.password !== password) {
+      return socket.emit('login failed', '房间密码错误！');
+    }
+    if (Object.values(room.users).includes(username)) {
+      return socket.emit('nickname taken');
+    }
+
+    // 验证通过
+    socket.join(roomId); // 让 socket 加入 Socket.IO 的房间
+    socket.roomId = roomId; // 在 socket 上存储房间ID
+    socket.username = username; // 在 socket 上存储用户名
+    room.users[socket.id] = username; // 在我们的房间对象里也存一份
+
+    socket.emit('login success', room.name);
+
+    // 【关键】只向该房间广播消息
+    socket.to(roomId).emit('user joined', username);
+    io.to(roomId).emit('update user list', Object.values(room.users));
+  });
+
+  // 【已重构】处理聊天消息
   socket.on('chat message', (msg) => {
-    if (socket.username) {
-        io.emit('chat message', { username: socket.username, msg });
+    if (socket.username && socket.roomId) {
+      io.to(socket.roomId).emit('chat message', { username: socket.username, msg });
     }
   });
 
-  // 【已重构】监听私聊消息，通过遍历 socket 查找目标用户
+  // 【已重构】处理私信
   socket.on('private message', (data) => {
-    if (!socket.username) return;
+    const { to, msg } = data;
+    const room = rooms[socket.roomId];
+    if (!socket.username || !room) return;
 
-    let targetSocket = null;
-    for (const [id, sk] of io.sockets.sockets) {
-        if (sk.username === data.to) {
-            targetSocket = sk;
-            break;
-        }
+    let targetSocketId = null;
+    for (const id in room.users) {
+      if (room.users[id] === to) {
+        targetSocketId = id;
+        break;
+      }
     }
-
-    if (targetSocket) {
-      const messageData = {
-          from: socket.username,
-          to: data.to,
-          msg: data.msg
-      };
-      targetSocket.emit('private message', messageData);
-      socket.emit('private message', messageData); // 也发给自己
+    
+    if (targetSocketId) {
+      const messageData = { from: socket.username, to, msg };
+      io.to(targetSocketId).emit('private message', messageData);
+      socket.emit('private message', messageData);
     }
   });
 
-  // 【已重构】监听用户断开连接，从 socket 对象获取用户名
+  // 【已重构】处理断开连接
   socket.on('disconnect', () => {
-    if (socket.username) {
-      console.log('User disconnected:', socket.username);
-      io.emit('user left', socket.username);
-      io.emit('update user list', getOnlineUsers());
+    if (socket.username && socket.roomId) {
+      const room = rooms[socket.roomId];
+      if (room) {
+        delete room.users[socket.id];
+        // 如果房间空了，可以选择解散房间
+        if (Object.keys(room.users).length === 0) {
+          delete rooms[socket.roomId];
+          console.log(`Room ${socket.roomId} is empty and has been closed.`);
+        } else {
+          // 否则，更新房间内的用户列表
+          io.to(socket.roomId).emit('user left', socket.username);
+          io.to(socket.roomId).emit('update user list', Object.values(room.users));
+        }
+      }
     }
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}. Room password is: ${ROOM_PASSWORD}`);
+  console.log(`Server is running on port ${PORT}`);
 });
