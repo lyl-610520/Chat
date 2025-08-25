@@ -1,13 +1,14 @@
 {
   "name": "gem-chat-room",
   "version": "1.0.0",
-  "description": "A simple and elegant web chat room.",
+  "description": "A multi-room, private web chat application.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.19.2",
+    "nanoid": "^3.3.7",
     "socket.io": "^4.7.5"
   },
   "engines": {
