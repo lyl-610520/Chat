@@ -1,222 +1,208 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat Room for Tong'er</title>
+    <title>Gem's Private Chat Room</title>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
     <style>
-        /* --- 默认主题变量 --- */
         :root {
-            --bg-color: #f0f2f5;
-            --panel-bg: #ffffff;
-            --accent-color: #5dade2;
-            --text-color: #0d0d0d;
-            --secondary-text: #65676b;
-            --border-color: #ced0d4;
-            --my-message-bg: #5dade2;
-            --their-message-bg: #e4e6eb;
-            --private-msg-bg: #fffbe6;
-            --private-msg-text-color: #333;
+            --bg-color: #f0f2f5; --panel-bg: #ffffff; --accent-color: #5dade2; --text-color: #0d0d0d;
+            --secondary-text: #65676b; --border-color: #ced0d4; --my-message-bg: #5dade2;
+            --their-message-bg: #e4e6eb; --private-msg-bg: #fffbe6; --private-msg-text-color: #333;
             --display-font: 'ZCOOL KuaiLe', cursive;
         }
-
-        /* --- 桐儿生日版 主题变量 --- */
         body[data-theme='cat-theme'] {
-            --bg-color: #fdf2f6;
-            --panel-bg: rgba(255, 255, 255, 0.85);
-            --accent-color: #ff85a2;
-            --text-color: #4a4a4a;
-            --secondary-text: #a88fb8;
-            --border-color: #ffc2d4;
-            --my-message-bg: #ffb9d4;
-            --their-message-bg: #ffffff;
-            --private-msg-bg: #f5f3ff;
+            --bg-color: #fdf2f6; --panel-bg: rgba(255, 255, 255, 0.85); --accent-color: #ff85a2;
+            --text-color: #4a4a4a; --secondary-text: #a88fb8; --border-color: #ffc2d4;
+            --my-message-bg: #ffb9d4; --their-message-bg: #ffffff; --private-msg-bg: #f5f3ff;
         }
-
-        /* --- 基础与动画 --- */
         html, body { height: 100%; margin: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; background-color: var(--bg-color); overflow: hidden; transition: background-color 0.5s ease; }
-        #chat-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; }
-        
-        @keyframes fall {
-            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(110vh) translateX(15vw) rotate(720deg); opacity: 0; }
-        }
-        @keyframes fall-reverse {
-            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(110vh) translateX(-15vw) rotate(-720deg); opacity: 0; }
-        }
-
+        #chat-container, #welcome-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; }
+        .hidden { display: none !important; }
+        #welcome-container { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #welcome-container h1 { font-size: 2.5em; color: var(--text-color); }
+        #welcome-container p { font-size: 1.2em; color: var(--secondary-text); margin-bottom: 40px; }
+        .welcome-buttons button { font-size: 1.2em; padding: 15px 30px; margin: 0 10px; border: none; border-radius: 8px; cursor: pointer; background-color: var(--accent-color); color: white; }
+        @keyframes fall { 0% { transform: translateY(-10vh); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
         #special-effects-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-        .flower {
-            position: absolute;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-image: url('https://api.iconify.design/emojione/fallen-leaf.svg?color=%23c4a484');
-            animation-timing-function: linear;
-            animation-iteration-count: infinite;
-        }
-        .flower.reverse {
-             animation-name: fall-reverse;
-             background-image: url('https://api.iconify.design/emojione/fallen-leaf.svg?color=%23d4b494');
-        }
-        .flower:not(.reverse) {
-            animation-name: fall;
-        }
-
-        /* --- Canvas 蛋糕样式 --- */
-        #birthday-cake {
-            position: fixed;
-            z-index: 0;
-            right: -20px;
-            bottom: -20px;
-            width: 350px;
-            height: 350px;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: all 0.8s ease-in-out;
-            pointer-events: none;
-        }
+        .flower { position: absolute; background-size: contain; background-repeat: no-repeat; background-image: url('https://api.iconify.design/emojione/fallen-leaf.svg?color=%23c4a484'); animation: fall linear infinite; }
+        #birthday-cake { position: fixed; z-index: 0; right: -20px; bottom: -20px; width: 350px; height: 350px; opacity: 0; transform: scale(0.8); transition: all 0.8s ease-in-out; pointer-events: none; }
         #cake-canvas { width: 100%; height: 100%; }
-        body[data-theme='cat-theme'] #birthday-cake {
-            opacity: 0.95;
-            transform: scale(1);
-        }
-        
-        /* --- Canvas 猫咪样式 --- */
-        #cat-mascot {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 120px;
-            height: 120px;
-            cursor: grab;
-            z-index: 101;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            opacity: 0;
-            pointer-events: none;
-        }
+        body[data-theme='cat-theme'] #birthday-cake { opacity: 0.95; transform: scale(1); }
+        #cat-mascot { position: fixed; bottom: 20px; left: 20px; width: 120px; height: 120px; cursor: grab; z-index: 101; transition: opacity 0.3s ease, transform 0.3s ease; opacity: 0; pointer-events: none; }
         #cat-canvas { width: 100%; height: 100%; }
-        body[data-theme='cat-theme'] #cat-mascot {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        body[data-theme='cat-theme'] #cat-mascot { opacity: 1; pointer-events: auto; }
         #cat-mascot:active { cursor: grabbing; transform: scale(1.1); }
         #cat-mascot.tapped { animation: cat-tap-animation 0.5s ease; }
-        @keyframes cat-tap-animation {
-            0% { transform: scale(1.1); }
-            50% { transform: scale(0.9) rotate(5deg); }
-            100% { transform: scale(1.1) rotate(-5deg); }
-        }
-
-        /* --- 侧边栏 --- */
-        #sidebar { width: 280px; background-color: var(--panel-bg); backdrop-filter: blur(10px); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; transition: all 0.5s ease; position: relative; height: 100%; }
-        #sidebar h2 { margin: 0 0 20px 0; color: var(--text-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; flex-shrink: 0; }
-        #user-list { list-style-type: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; -webkit-overflow-scrolling: touch; }
-        #user-list li { padding: 10px; border-radius: 12px; margin-bottom: 5px; color: var(--secondary-text); font-weight: 500; transition: background-color 0.2s; }
+        @keyframes cat-tap-animation { 0% { transform: scale(1.1); } 50% { transform: scale(0.9) rotate(5deg); } 100% { transform: scale(1.1) rotate(-5deg); } }
+        #sidebar { width: 280px; background-color: var(--panel-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; height: 100%; }
+        #sidebar h2 { margin: 0 0 5px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        #sidebar #room-name-display { font-size: 0.8em; color: var(--secondary-text); margin-bottom: 15px; }
+        #user-list { list-style-type: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
+        #user-list li { padding: 10px; border-radius: 12px; margin-bottom: 5px; }
         #user-list li.can-chat:hover { background-color: rgba(0,0,0,0.05); cursor: pointer; }
-        #theme-switcher { margin-top: auto; padding-top: 20px; border: none; background: transparent; color: var(--accent-color); cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; flex-shrink: 0; }
-
-        /* --- 聊天主窗口 --- */
-        #main-chat { flex-grow: 1; display: flex; flex-direction: column; background-color: transparent; position: relative; height: 100%; }
-        #main-chat::before { content: '桐儿生日快乐'; position: absolute; top: 50%; left: 50%; width: 100%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; }
+        #theme-switcher { margin-top: auto; padding-top: 20px; border: none; background: transparent; cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; }
+        #main-chat { flex-grow: 1; display: flex; flex-direction: column; height: 100%; }
+        #main-chat::before { content: '桐儿生日快乐'; position: absolute; top: 50%; left: 50%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: -1; opacity: 0; transition: opacity 0.8s ease; }
         body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
-        #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; }
-
-        /* --- 【已修正】消息气泡的完整样式块 --- */
-        #messages li { 
-            display: flex; 
-            flex-direction: column; 
-            margin-bottom: 12px; 
-            max-width: 75%; 
-            width: -moz-fit-content; 
-            width: fit-content; 
-            opacity: 0; 
-            transform: translateY(20px); 
-            animation: slideUp 0.4s forwards;
-        }
-        
-        .message-bubble { 
-            padding: 12px 18px; 
-            border-radius: 18px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08); 
-            line-height: 1.5; 
-            word-break: break-all; 
-        }
-
+        #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; display: flex; flex-direction: column; }
+        #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: fit-content; animation: slideUp 0.4s forwards; }
+        .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-
-        body[data-theme='cat-theme'] .message-bubble {
-            border: 2px solid #ffdae5;
-            box-shadow: 0 4px 12px rgba(255, 133, 162, 0.15);
-            position: relative;
-            padding: 15px 25px;
-        }
-        body[data-theme='cat-theme'] .message-bubble::before,
-        body[data-theme='cat-theme'] .message-bubble::after {
-            content: '🎀'; position: absolute; font-size: 16px; opacity: 0.8;
-        }
-        body[data-theme='cat-theme'] .message-bubble::before { top: -10px; left: 15px; transform: rotate(-20deg); }
-        body[data-theme='cat-theme'] .message-bubble::after { bottom: -12px; right: 15px; transform: rotate(15deg); }
-        
-        li.my-message { 
-            align-self: flex-end; 
-            align-items: flex-end; /* 关键修正 */
-        }
-        li.their-message { 
-            align-self: flex-start;
-            align-items: flex-start; /* 关键修正 */
-        }
-
+        body[data-theme='cat-theme'] .message-bubble { border: 2px solid #ffdae5; }
+        li.my-message { align-self: flex-end; align-items: flex-end; }
+        li.their-message { align-self: flex-start; align-items: flex-start; }
         .my-message .message-bubble { background: var(--my-message-bg); color: #fff; }
-        .their-message .message-bubble { background-color: var(--their-message-bg); color: var(--text-color); }
-        .private-message .message-bubble { background-color: var(--private-msg-bg); color: var(--private-msg-text-color) !important; border: 1px dashed var(--accent-color); }
-        li.system-message { align-self: center; color: var(--secondary-text); font-style: italic; font-size: 0.9em; }
-        .message-sender { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; color: var(--secondary-text); padding: 0 5px; }
-        
-        /* --- 输入框 --- */
-        #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); backdrop-filter: blur(10px); flex-shrink: 0; }
-        #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 10px 18px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
-        #input:focus { outline: none; border-color: var(--accent-color); }
-        #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; }
-        
-        /* --- 登录与移动端适配 --- */
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        #login-box { background: var(--panel-bg); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,.1); }
-        #login-box input { padding: 12px; font-size: 1.1em; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; }
-        #login-box button { padding: 12px 25px; font-size: 1.1em; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; }
-        @media (max-width: 768px) { #sidebar { position: fixed; left: 0; top: 0; width: 80%; max-width: 300px; z-index: 100; transform: translateX(-100%); } body.sidebar-open #sidebar { transform: translateX(0); } #main-chat { transition: filter 0.3s; } body.sidebar-open #main-chat { filter: brightness(0.5); pointer-events: none; } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; } }
+        .their-message .message-bubble { background-color: var(--their-message-bg); }
+        .private-message .message-bubble { background-color: var(--private-msg-bg); border: 1px dashed var(--accent-color); }
+        li.system-message { align-self: center; font-style: italic; }
+        .message-sender { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
+        #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); }
+        #input { border: 1px solid var(--border-color); padding: 10px 18px; flex-grow: 1; border-radius: 30px; margin-right: 10px; }
+        #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: 30px; cursor: pointer; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.3s ease; }
+        .overlay.visible { visibility: visible; opacity: 1; }
+        .modal-box { background: var(--panel-bg); padding: 30px 40px; border-radius: 12px; text-align: center; }
+        .modal-box input { display: block; width: 220px; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin: 15px 0; }
+        .modal-box .button-group { display: flex; justify-content: center; gap: 10px; }
+        .modal-box button { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; }
+        .modal-box .primary-btn { background: var(--accent-color); color: white; }
+        .modal-box .secondary-btn { background: #ccc; }
+        #share-link input { width: 100%; }
+        @media (max-width: 768px) { #sidebar { position: fixed; z-index: 100; transform: translateX(-100%); } body.sidebar-open #sidebar { transform: translateX(0); } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; } }
         @media (min-width: 769px) { #toggle-users { display: none; } }
     </style>
 </head>
 <body>
 
 <div id="special-effects-container"></div>
-<div id="birthday-cake">
-    <canvas id="cake-canvas"></canvas>
-</div>
-<div id="cat-mascot">
-    <canvas id="cat-canvas"></canvas>
+<div id="birthday-cake"><canvas id="cake-canvas"></canvas></div>
+<div id="cat-mascot"><canvas id="cat-canvas"></canvas></div>
+
+<div id="welcome-container">
+    <h1>欢迎来到私人聊天室</h1>
+    <p>创建一个房间或加入朋友的房间</p>
+    <div class="welcome-buttons">
+        <button id="create-room-btn">创建新房间</button>
+        <button id="join-room-btn">加入房间</button>
+    </div>
 </div>
 
-<div id="login-overlay"><div id="login-box"><h2>Enter your nickname</h2><form id="login-form"><input id="nickname-input" autocomplete="off" required /><br/><button>Join Chat</button></form></div></div>
-<div id="chat-container">
-    <div id="sidebar"><h2>Online Users</h2><ul id="user-list"></ul><button id="theme-switcher">✨ 切换到 桐儿生日版</button></div>
-    <div id="main-chat"><ul id="messages"></ul><form id="form" action=""><input id="input" autocomplete="off" placeholder="Type a message..." /><button>Send</button></form></div>
+<div id="create-room-overlay" class="overlay">
+    <div class="modal-box">
+        <h2>创建新房间</h2>
+        <form id="create-room-form">
+            <input id="create-room-name" placeholder="房间名称" required>
+            <input id="create-room-password" type="password" placeholder="房间密码 (可不填)">
+            <div class="button-group">
+                <button type="submit" class="primary-btn">创建</button>
+                <button type="button" class="secondary-btn" data-close>取消</button>
+            </div>
+        </form>
+    </div>
 </div>
-<button id="toggle-users">&#9776;</button>
+
+<div id="share-link-overlay" class="overlay">
+    <div class="modal-box">
+        <h2>创建成功！</h2>
+        <p>复制下面的链接分享给你的朋友：</p>
+        <div><input type="text" id="room-link-input" readonly></div>
+        <div class="button-group" style="margin-top: 20px;">
+             <button type="button" id="copy-link-btn" class="primary-btn">复制链接</button>
+             <button type="button" class="secondary-btn" data-close>关闭</button>
+        </div>
+    </div>
+</div>
+
+<div id="join-room-overlay" class="overlay">
+    <div class="modal-box">
+        <h2>加入房间</h2>
+        <form id="join-room-form">
+            <input id="join-room-id" placeholder="输入房间ID或粘贴链接">
+             <div class="button-group">
+                <button type="submit" class="primary-btn">下一步</button>
+                <button type="button" class="secondary-btn" data-close>取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="login-overlay" class="overlay">
+    <div class="modal-box">
+        <h2 id="login-room-name">加入房间</h2>
+        <form id="login-form">
+            <input id="nickname-input" autocomplete="off" placeholder="输入你的昵称" required />
+            <input id="password-input" type="password" placeholder="输入房间密码" />
+            <div class="button-group">
+                <button type="submit" class="primary-btn">加入</button>
+                <button type="button" class="secondary-btn" data-close>返回</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="pm-overlay" class="overlay">
+    <div class="modal-box">
+        <h2 id="pm-title">发送私信</h2>
+        <form id="pm-form">
+            <input id="pm-input" autocomplete="off" required />
+            <div class="button-group">
+                <button type="submit" class="primary-btn">发送</button>
+                <button type="button" class="secondary-btn" data-close>取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="chat-container" class="hidden">
+    <div id="sidebar">
+        <h2>在线用户</h2>
+        <p id="room-name-display"></p>
+        <ul id="user-list"></ul>
+        <button id="theme-switcher">✨ 切换到 桐儿生日版</button>
+    </div>
+    <div id="main-chat">
+        <ul id="messages"></ul>
+        <form id="form"><input id="input" autocomplete="off" placeholder="输入消息..." /><button>发送</button></form>
+    </div>
+</div>
+<button id="toggle-users" class="hidden">&#9776;</button>
 
 <script src="/socket.io/socket.io.js"></script>
-
 <script>
-    // --- 元素选取 ---
     const socket = io();
     const body = document.body;
+    let myNickname = '', currentRoomId = '';
+
+    const welcomeContainer = document.getElementById('welcome-container');
+    const createRoomBtn = document.getElementById('create-room-btn');
+    const joinRoomBtn = document.getElementById('join-room-btn');
+    const overlays = document.querySelectorAll('.overlay');
+    const createRoomOverlay = document.getElementById('create-room-overlay');
+    const joinRoomOverlay = document.getElementById('join-room-overlay');
     const loginOverlay = document.getElementById('login-overlay');
+    const shareLinkOverlay = document.getElementById('share-link-overlay');
+    const pmOverlay = document.getElementById('pm-overlay');
+    const createRoomForm = document.getElementById('create-room-form');
+    const createRoomNameInput = document.getElementById('create-room-name');
+    const createRoomPasswordInput = document.getElementById('create-room-password');
+    const roomLinkInput = document.getElementById('room-link-input');
+    const copyLinkBtn = document.getElementById('copy-link-btn');
+    const joinRoomForm = document.getElementById('join-room-form');
+    const joinRoomIdInput = document.getElementById('join-room-id');
     const loginForm = document.getElementById('login-form');
+    const loginRoomName = document.getElementById('login-room-name');
     const nicknameInput = document.getElementById('nickname-input');
+    const passwordInput = document.getElementById('password-input');
+    const pmTitle = document.getElementById('pm-title');
+    const pmForm = document.getElementById('pm-form');
+    const pmInput = document.getElementById('pm-input');
+    let pmTargetUser = '';
+    const chatContainer = document.getElementById('chat-container');
+    const roomNameDisplay = document.getElementById('room-name-display');
     const form = document.getElementById('form');
     const input = document.getElementById('input');
     const messages = document.getElementById('messages');
@@ -226,374 +212,128 @@
     const effectsContainer = document.getElementById('special-effects-container');
     const catMascot = document.getElementById('cat-mascot');
     const catCanvas = document.getElementById('cat-canvas');
-    const cakeContainer = document.getElementById('birthday-cake');
     const cakeCanvas = document.getElementById('cake-canvas');
-    let myNickname = '';
 
-    // --- 消息处理器 ---
-    const createMessageElement = (data) => {
-        const item = document.createElement('li');
-        const sender = document.createElement('span');
-        sender.className = 'message-sender';
-        const bubble = document.createElement('div');
-        bubble.className = 'message-bubble';
-        bubble.textContent = data.msg;
+    function showOverlay(overlay) { overlays.forEach(o => o.classList.remove('visible')); overlay.classList.add('visible'); }
+    function hideOverlays() { overlays.forEach(o => o.classList.remove('visible')); }
+    document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => {
+        btn.closest('.overlay').classList.remove('visible');
+    }));
 
-        if (data.type === 'system') {
-            item.className = 'system-message';
-            item.textContent = data.msg;
-        } else {
-            if (data.from === myNickname) { item.classList.add('my-message'); } 
-            else { item.classList.add('their-message'); }
-
-            if (data.type === 'private') {
-                item.classList.add('private-message');
-                sender.textContent = `[私信] ${data.from} 对 ${data.to} 说:`;
-                item.appendChild(sender);
-            } else {
-                if (data.from !== myNickname) {
-                    sender.textContent = data.from;
-                    item.appendChild(sender);
-                }
-            }
-            item.appendChild(bubble);
+    document.addEventListener('DOMContentLoaded', () => {
+        const roomIdFromUrl = new URLSearchParams(window.location.search).get('room');
+        if (roomIdFromUrl) {
+            welcomeContainer.classList.add('hidden');
+            socket.emit('join check', roomIdFromUrl);
         }
-        
-        messages.appendChild(item);
-        messages.scrollTop = messages.scrollHeight;
-    };
-
-    // --- Socket 事件监听 ---
-    socket.on('chat message', (data) => createMessageElement({ ...data, from: data.username, type: 'public' }));
-    socket.on('private message', (data) => createMessageElement({ ...data, type: 'private' }));
-    socket.on('user joined', (username) => createMessageElement({ msg: `${username} has joined.`, type: 'system' }));
-    socket.on('user left', (username) => { if (username) createMessageElement({ msg: `${username} has left.`, type: 'system' }); });
-
-    socket.on('nickname taken', () => {
-        alert('这个昵称已经被别人用啦，换一个吧！');
-        nicknameInput.disabled = false;
-        loginForm.querySelector('button').disabled = false;
-        loginForm.querySelector('button').textContent = 'Join Chat';
-        nicknameInput.focus();
-        nicknameInput.select();
+        makeDraggable(catMascot);
+        applyTheme(localStorage.getItem('chat_theme') || 'default');
     });
 
-    socket.on('login success', () => {
+    createRoomBtn.addEventListener('click', () => showOverlay(createRoomOverlay));
+    joinRoomBtn.addEventListener('click', () => showOverlay(joinRoomOverlay));
+
+    socket.on('room created', (roomId) => {
+        roomLinkInput.value = `${location.origin}${location.pathname}?room=${roomId}`;
+        showOverlay(shareLinkOverlay);
+    });
+    socket.on('room exists', (data) => {
+        currentRoomId = new URLSearchParams(window.location.search).get('room');
+        loginRoomName.textContent = `加入房间: ${data.name}`;
+        passwordInput.style.display = data.hasPassword ? 'block' : 'none';
+        passwordInput.required = data.hasPassword;
+        showOverlay(loginOverlay);
+    });
+    socket.on('room not found', () => { alert('房间不存在！'); location.href = location.origin; });
+    socket.on('login success', (roomName) => {
         myNickname = nicknameInput.value;
-        loginOverlay.style.display = 'none';
-        input.focus();
+        hideOverlays();
+        welcomeContainer.classList.add('hidden');
+        chatContainer.classList.remove('hidden');
+        toggleButton.classList.remove('hidden');
+        roomNameDisplay.textContent = `房间: ${roomName}`;
     });
-    
-    socket.on('connect', () => {
-        console.log('Socket connected!');
-        if (myNickname) {
-            console.log(`Re-authenticating as: ${myNickname}`);
-            socket.emit('new user', myNickname);
-        }
-    });
-
-    // --- 更新用户列表 ---
+    socket.on('login failed', (reason) => { alert(reason); loginForm.querySelector('button').disabled = false; });
+    socket.on('nickname taken', () => { alert('昵称已被使用！'); loginForm.querySelector('button').disabled = false; });
+    socket.on('user joined', (username) => createMessageElement({ msg: `${username} 加入了`, type: 'system' }));
+    socket.on('user left', (username) => createMessageElement({ msg: `${username} 离开了`, type: 'system' }));
+    socket.on('chat message', (data) => createMessageElement({ ...data, type: 'public' }));
+    socket.on('private message', (data) => createMessageElement({ ...data, type: 'private' }));
     socket.on('update user list', (users) => {
         userList.innerHTML = '';
         users.forEach(user => {
-            const item = document.createElement('li');
-            item.textContent = user;
-            if (user === myNickname) {
-                item.textContent += ' (You)';
-            } else {
-                item.classList.add('can-chat');
-                item.addEventListener('click', () => {
-                    const pm = prompt(`发送私信给 ${user}:`);
-                    if (pm && pm.trim() !== '') {
-                        socket.emit('private message', { to: user, msg: pm });
-                    }
+            const li = document.createElement('li');
+            li.textContent = user;
+            if (user === myNickname) { li.textContent += ' (You)'; } 
+            else {
+                li.classList.add('can-chat');
+                li.addEventListener('click', () => {
+                    pmTargetUser = user;
+                    pmTitle.textContent = `发送私信给 ${user}`;
+                    showOverlay(pmOverlay);
                 });
             }
-            userList.appendChild(item);
+            userList.appendChild(li);
         });
     });
 
-    // --- 表单与按钮事件 ---
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const nickname = nicknameInput.value.trim();
-        if (nickname) {
-            nicknameInput.disabled = true;
-            loginForm.querySelector('button').disabled = true;
-            loginForm.querySelector('button').textContent = 'Joining...';
-            socket.emit('new user', nickname);
+    createRoomForm.addEventListener('submit', e => { e.preventDefault(); socket.emit('create room', { roomName: createRoomNameInput.value, password: createRoomPasswordInput.value }); });
+    joinRoomForm.addEventListener('submit', e => { e.preventDefault(); let id = joinRoomIdInput.value; try { id = new URL(id).searchParams.get('room') || id; } catch (_) {} location.href = `${location.origin}${location.pathname}?room=${id}`; });
+    loginForm.addEventListener('submit', e => { e.preventDefault(); if (nicknameInput.value) { loginForm.querySelector('button').disabled = true; socket.emit('join room', { roomId: currentRoomId, username: nicknameInput.value, password: passwordInput.value }); } });
+    pmForm.addEventListener('submit', e => { e.preventDefault(); if (pmInput.value) { socket.emit('private message', { to: pmTargetUser, msg: pmInput.value }); pmInput.value = ''; hideOverlays(); } });
+    document.querySelector('#pm-overlay [data-close]').addEventListener('click', hideOverlays);
+    copyLinkBtn.addEventListener('click', () => { roomLinkInput.select(); document.execCommand('copy'); alert('已复制！'); });
+    form.addEventListener('submit', e => { e.preventDefault(); if (input.value) { socket.emit('chat message', input.value); input.value = ''; } });
+    toggleButton.addEventListener('click', () => body.classList.toggle('sidebar-open'));
+
+    function createMessageElement(data) {
+        const shouldScroll = messages.scrollTop + messages.clientHeight >= messages.scrollHeight - 30;
+        const li = document.createElement('li');
+        if (data.type === 'system') { li.className = 'system-message'; li.textContent = data.msg; } 
+        else {
+            if (data.from === myNickname) { li.classList.add('my-message'); } 
+            else { li.classList.add('their-message'); }
+            const sender = document.createElement('span');
+            sender.className = 'message-sender';
+            if (data.type === 'private') { li.classList.add('private-message'); sender.textContent = `[私信] ${data.from} 对 ${data.to}:`; } 
+            else { sender.textContent = data.from; }
+            if (data.from !== myNickname) li.appendChild(sender);
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = data.msg;
+            li.appendChild(bubble);
         }
-    });
-    
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (input.value.trim()) {
-            socket.emit('chat message', input.value);
-            input.value = '';
-        }
-    });
-    
-    toggleButton.addEventListener('click', () => {
-        body.classList.toggle('sidebar-open');
-    });
-    
-    // --- Canvas 绘图与交互逻辑 ---
-    function setupCanvas(canvas) {
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.parentElement.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        const ctx = canvas.getContext('2d');
-        ctx.scale(dpr, dpr);
-        return ctx;
+        messages.appendChild(li);
+        if (shouldScroll) messages.scrollTop = messages.scrollHeight;
     }
-
-    function drawCake(ctx) {
-        const w = ctx.canvas.width / (window.devicePixelRatio || 1);
-        const h = ctx.canvas.height / (window.devicePixelRatio || 1);
-        ctx.clearRect(0, 0, w * 2, h * 2);
-        
-        ctx.fillStyle = '#E0C9A6';
-        ctx.beginPath();
-        ctx.ellipse(w * 0.5, h * 0.8, w * 0.45, h * 0.1, 0, 0, 2 * Math.PI);
-        ctx.fill();
-
-        ctx.fillStyle = '#FADADD';
-        ctx.fillRect(w * 0.15, h * 0.6, w * 0.7, h * 0.2);
-        
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(w * 0.15, h * 0.58, w * 0.7, h * 0.05);
-
-        ctx.fillStyle = '#F3C5C5';
-        ctx.fillRect(w * 0.2, h * 0.4, w * 0.6, h * 0.2);
-
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.moveTo(w * 0.2, h * 0.4);
-        ctx.bezierCurveTo(w * 0.3, h * 0.45, w * 0.4, h * 0.35, w * 0.5, h * 0.4);
-        ctx.bezierCurveTo(w * 0.6, h * 0.45, w * 0.7, h * 0.35, w * 0.8, h * 0.4);
-        ctx.lineTo(w * 0.8, h * 0.38);
-        ctx.lineTo(w * 0.2, h * 0.38);
-        ctx.closePath();
-        ctx.fill();
-
-        const candleX = w * 0.5;
-        const candleY = h * 0.38;
-        ctx.fillStyle = '#f0e68c';
-        ctx.beginPath();
-        ctx.rect(candleX - w * 0.02, candleY - h * 0.15, w * 0.04, h * 0.15);
-        ctx.fill();
-        
-        ctx.fillStyle = '#ffd700';
-        ctx.beginPath();
-        ctx.ellipse(candleX, candleY - h * 0.18, w * 0.02, h * 0.04, 0, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.fillStyle = 'rgba(255, 165, 0, 0.7)';
-        ctx.beginPath();
-        ctx.ellipse(candleX, candleY - h * 0.17, w * 0.015, h * 0.03, 0, 0, 2 * Math.PI);
-        ctx.fill();
-    }
-
+    
+    function setupCanvas(canvas) { const dpr = window.devicePixelRatio || 1; const rect = canvas.parentElement.getBoundingClientRect(); canvas.width = rect.width * dpr; canvas.height = rect.height * dpr; const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr); return ctx; }
     let eyesOpen = true;
     function drawCat(ctx) {
-        const w = ctx.canvas.width / (window.devicePixelRatio || 1);
-        const h = ctx.canvas.height / (window.devicePixelRatio || 1);
+        const w = ctx.canvas.width / (window.devicePixelRatio || 1), h = ctx.canvas.height / (window.devicePixelRatio || 1);
         ctx.clearRect(0, 0, w * 2, h * 2);
-    
-        ctx.strokeStyle = '#5D4037';
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
-    // 头部轮廓
-    ctx.fillStyle = '#FFF8E1';
-    const headCenterX = w / 2;
-    const headCenterY = h * 0.55;
-    const headRadius = w * 0.4;
-    ctx.beginPath();
-    ctx.arc(headCenterX, headCenterY, headRadius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // 【最终修正】耳朵，使用非常简单的三角形绘制
-    ctx.fillStyle = '#FFCDD2';
-
-    // 左耳
-    ctx.beginPath();
-    ctx.moveTo(headCenterX - headRadius * 0.7, headCenterY - headRadius * 0.2); // 左下角
-    ctx.lineTo(headCenterX - headRadius * 0.3, headCenterY - headRadius * 1.2); // 顶点
-    ctx.lineTo(headCenterX + headRadius * 0.1, headCenterY - headRadius * 0.7); // 右下角
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // 右耳
-    ctx.beginPath();
-    ctx.moveTo(headCenterX + headRadius * 0.7, headCenterY - headRadius * 0.2); // 右下角
-    ctx.lineTo(headCenterX + headRadius * 0.3, headCenterY - headRadius * 1.2); // 顶点
-    ctx.lineTo(headCenterX - headRadius * 0.1, headCenterY - headRadius * 0.7); // 左下角
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-
-    // 眼睛
-    ctx.fillStyle = '#5D4037';
-    const eyeY = headCenterY - h * 0.05;
-    if (eyesOpen) {
-        ctx.beginPath();
-        ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2);
-        ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2);
-        ctx.fill();
-    } else {
-        ctx.beginPath();
-        ctx.moveTo(w * 0.3, eyeY);
-        ctx.lineTo(w * 0.4, eyeY);
-        ctx.moveTo(w * 0.6, eyeY);
-        ctx.lineTo(w * 0.7, eyeY);
-        ctx.stroke();
+        ctx.strokeStyle = '#5D4037'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.fillStyle = '#FFF8E1';
+        const centerX = w / 2, centerY = h * 0.55, radius = w * 0.4;
+        ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#FFCDD2';
+        ctx.beginPath(); ctx.moveTo(centerX - radius * 0.8, centerY - radius * 0.1); ctx.lineTo(centerX - radius * 0.3, centerY - radius * 1.2); ctx.lineTo(centerX + radius * 0.2, centerY - radius * 0.6); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(centerX + radius * 0.8, centerY - radius * 0.1); ctx.lineTo(centerX + radius * 0.3, centerY - radius * 1.2); ctx.lineTo(centerX - radius * 0.2, centerY - radius * 0.6); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#5D4037';
+        const eyeY = centerY - h * 0.05;
+        if (eyesOpen) { ctx.beginPath(); ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2); ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2); ctx.fill(); } 
+        else { ctx.beginPath(); ctx.moveTo(w * 0.3, eyeY); ctx.lineTo(w * 0.4, eyeY); ctx.moveTo(w * 0.6, eyeY); ctx.lineTo(w * 0.7, eyeY); ctx.stroke(); }
+        const mouthY = centerY + h * 0.08;
+        ctx.beginPath(); ctx.moveTo(w * 0.45, mouthY); ctx.lineTo(w * 0.55, mouthY); ctx.moveTo(w * 0.5, mouthY); ctx.lineTo(w * 0.5, mouthY + h * 0.05); ctx.stroke();
+        ctx.beginPath(); ctx.arc(w * 0.5, mouthY + h * 0.05, w * 0.15, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
     }
-
-    // 嘴巴
-    const mouthY = headCenterY + h * 0.08;
-    ctx.beginPath();
-    ctx.moveTo(w * 0.45, mouthY);
-    ctx.lineTo(w * 0.55, mouthY);
-    ctx.moveTo(w * 0.5, mouthY);
-    ctx.lineTo(w * 0.5, mouthY + h * 0.05);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(w * 0.5, mouthY + h * 0.05, w * 0.15, 0.2 * Math.PI, 0.8 * Math.PI);
-    ctx.stroke();
-}
-    
-    function makeDraggable(element) {
-        let isDragging = false, hasMoved = false, offsetX, offsetY;
-
-        function onStart(e) {
-            isDragging = true;
-            hasMoved = false;
-            const event = e.type === 'touchstart' ? e.touches[0] : e;
-            const rect = element.getBoundingClientRect();
-            offsetX = event.clientX - rect.left;
-            offsetY = event.clientY - rect.top;
-            element.style.transition = 'none';
-            e.preventDefault();
-        }
-
-        function onEnd(e) {
-            if (!isDragging) return;
-            isDragging = false;
-            element.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-            if (!hasMoved) {
-                element.classList.add('tapped');
-                setTimeout(() => element.classList.remove('tapped'), 500);
-            }
-        }
-
-        function onMove(e) {
-            if (!isDragging) return;
-            hasMoved = true;
-            const event = e.type === 'touchmove' ? e.touches[0] : e;
-            let newX = event.clientX - offsetX;
-            let newY = event.clientY - offsetY;
-            const maxX = window.innerWidth - element.offsetWidth;
-            const maxY = window.innerHeight - element.offsetHeight;
-            newX = Math.max(0, Math.min(newX, maxX));
-            newY = Math.max(0, Math.min(newY, maxY));
-            element.style.left = `${newX}px`;
-            element.style.top = `${newY}px`;
-            element.style.bottom = 'auto';
-            element.style.right = 'auto';
-        }
-
-        element.addEventListener('mousedown', onStart);
-        document.addEventListener('mouseup', onEnd);
-        document.addEventListener('mousemove', onMove);
-        element.addEventListener('touchstart', onStart, { passive: false });
-        document.addEventListener('touchend', onEnd);
-        document.addEventListener('touchmove', onMove, { passive: false });
-    }
-
-    // --- 主题与动画逻辑 ---
-    const defaultThemeName = "简约主题";
-    const catThemeName = "桐儿生日版";
+    function drawCake(ctx) { const w = ctx.canvas.width / (window.devicePixelRatio || 1), h = ctx.canvas.height / (window.devicePixelRatio || 1); ctx.clearRect(0, 0, w * 2, h * 2); ctx.fillStyle = '#E0C9A6'; ctx.beginPath(); ctx.ellipse(w * 0.5, h * 0.8, w * 0.45, h * 0.1, 0, 0, 2 * Math.PI); ctx.fill(); ctx.fillStyle = '#FADADD'; ctx.fillRect(w * 0.15, h * 0.6, w * 0.7, h * 0.2); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(w * 0.15, h * 0.58, w * 0.7, h * 0.05); ctx.fillStyle = '#F3C5C5'; ctx.fillRect(w * 0.2, h * 0.4, w * 0.6, h * 0.2); ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.moveTo(w * 0.2, h * 0.4); ctx.bezierCurveTo(w * 0.3, h * 0.45, w * 0.4, h * 0.35, w * 0.5, h * 0.4); ctx.bezierCurveTo(w * 0.6, h * 0.45, w * 0.7, h * 0.35, w * 0.8, h * 0.4); ctx.lineTo(w * 0.8, h * 0.38); ctx.lineTo(w * 0.2, h * 0.38); ctx.closePath(); ctx.fill(); const candleX = w * 0.5, candleY = h * 0.38; ctx.fillStyle = '#f0e68c'; ctx.beginPath(); ctx.rect(candleX - w * 0.02, candleY - h * 0.15, w * 0.04, h * 0.15); ctx.fill(); ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.ellipse(candleX, candleY - h * 0.18, w * 0.02, h * 0.04, 0, 0, 2 * Math.PI); ctx.fill(); ctx.fillStyle = 'rgba(255, 165, 0, 0.7)'; ctx.beginPath(); ctx.ellipse(candleX, candleY - h * 0.17, w * 0.015, h * 0.03, 0, 0, 2 * Math.PI); ctx.fill(); }
+    function makeDraggable(el) { let isDragging = false, hasMoved = false, x, y; function onStart(e) { isDragging = true; hasMoved = false; const ev = e.type === 'touchstart' ? e.touches[0] : e; const rect = el.getBoundingClientRect(); x = ev.clientX - rect.left; y = ev.clientY - rect.top; el.style.transition = 'none'; } function onEnd() { isDragging = false; el.style.transition = 'transform 0.3s ease'; if (!hasMoved) { el.classList.add('tapped'); setTimeout(() => el.classList.remove('tapped'), 500); } } function onMove(e) { if (!isDragging) return; hasMoved = true; const ev = e.type === 'touchmove' ? e.touches[0] : e; let newX = ev.clientX - x, newY = ev.clientY - y; newX = Math.max(0, Math.min(newX, innerWidth - el.offsetWidth)); newY = Math.max(0, Math.min(newY, innerHeight - el.offsetHeight)); el.style.left = `${newX}px`; el.style.top = `${newY}px`; el.style.bottom = 'auto'; el.style.right = 'auto'; } el.addEventListener('mousedown', onStart); document.addEventListener('mouseup', onEnd); document.addEventListener('mousemove', onMove); el.addEventListener('touchstart', onStart); document.addEventListener('touchend', onEnd); document.addEventListener('touchmove', onMove); }
     let blinkInterval;
-
-    function createFallingFlowers() {
-        effectsContainer.innerHTML = '';
-        const flowerCount = 25;
-        for (let i = 0; i < flowerCount; i++) {
-            const flower = document.createElement("div");
-            flower.classList.add("flower");
-            if (Math.random() > 0.5) flower.classList.add("reverse");
-            const size = 20 * Math.random() + 15;
-            flower.style.width = `${size}px`;
-            flower.style.height = `${size}px`;
-            flower.style.left = `${100 * Math.random()}vw`;
-            flower.style.animationDuration = `${10 * Math.random() + 8}s`;
-            flower.style.animationDelay = `${15 * Math.random()}s`;
-            flower.style.transform = `rotate(${Math.random() * 360}deg)`;
-            effectsContainer.appendChild(flower);
-        }
-    }
-
-    function applyTheme(theme) {
-        if (theme === "cat-theme") {
-            body.dataset.theme = "cat-theme";
-            themeSwitcher.innerHTML = `✨ 切换到 ${defaultThemeName}`;
-            localStorage.setItem("chat_theme", "cat-theme");
-            createFallingFlowers();
-            
-            const catCtx = setupCanvas(catCanvas);
-            drawCat(catCtx);
-            
-            if (blinkInterval) clearInterval(blinkInterval);
-            // 【已优化】将眨眼逻辑封装，减少 applyTheme 的复杂性
-            startBlinking(catCtx);
-
-            const cakeCtx = setupCanvas(cakeCanvas);
-            drawCake(cakeCtx);
-
-        } else {
-            body.dataset.theme = "default";
-            themeSwitcher.innerHTML = `✨ 切换到 ${catThemeName}`;
-            localStorage.setItem("chat_theme", "default");
-            effectsContainer.innerHTML = "";
-            if (blinkInterval) clearInterval(blinkInterval);
-        }
-    }
-    
-    // 【已优化】将眨眼动画封装成独立函数，并优化性能
-    function startBlinking(ctx) {
-        let isBlinking = false;
-        blinkInterval = setInterval(() => {
-            if(isBlinking) return; // 防止重复触发
-
-            isBlinking = true;
-            eyesOpen = false;
-            drawCat(ctx); // 闭眼
-
-            setTimeout(() => {
-                eyesOpen = true;
-                drawCat(ctx); // 睁眼
-                isBlinking = false;
-            }, 200); // 眨眼持续时间
-        }, 5000 + Math.random() * 2000); // 优化：5-7秒随机眨一次，更自然且性能更好
-    }
-
-    themeSwitcher.addEventListener('click', () => {
-        const current = body.dataset.theme || 'default';
-        applyTheme(current === 'cat-theme' ? 'default' : 'cat-theme');
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        makeDraggable(catMascot);
-        const saved = localStorage.getItem('chat_theme') || 'default';
-        applyTheme(saved);
-    });
+    function startBlinking(ctx) { if (blinkInterval) clearInterval(blinkInterval); blinkInterval = setInterval(() => { eyesOpen = false; requestAnimationFrame(() => drawCat(ctx)); setTimeout(() => { eyesOpen = true; requestAnimationFrame(() => drawCat(ctx)); }, 200); }, 5000 + Math.random() * 2000); }
+    function createFallingFlowers() { effectsContainer.innerHTML = ''; const count = 15; for (let i = 0; i < count; i++) { const flower = document.createElement("div"); flower.className = "flower"; const size = 20 * Math.random() + 15; flower.style.cssText = `width:${size}px;height:${size}px;left:${100*Math.random()}vw;animation-duration:${12*Math.random()+10}s;animation-delay:${20*Math.random()}s;`; if (Math.random() > 0.5) flower.style.animationName = 'fall-reverse'; effectsContainer.appendChild(flower); } }
+    function applyTheme(theme) { body.dataset.theme = theme; localStorage.setItem("chat_theme", theme); if (theme === "cat-theme") { themeSwitcher.innerHTML = `✨ 切换到 简约主题`; createFallingFlowers(); const catCtx = setupCanvas(catCanvas); drawCat(catCtx); startBlinking(catCtx); const cakeCtx = setupCanvas(cakeCanvas); drawCake(cakeCtx); } else { themeSwitcher.innerHTML = `✨ 切换到 桐儿生日版`; effectsContainer.innerHTML = ""; if (blinkInterval) clearInterval(blinkInterval); } }
+    themeSwitcher.addEventListener('click', () => applyTheme(body.dataset.theme === 'cat-theme' ? 'default' : 'cat-theme'));
 </script>
-
 </body>
-</html>
+</html>```
