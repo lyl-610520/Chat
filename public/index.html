@@ -83,6 +83,31 @@
         #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 10px 18px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
         #input:focus { outline: none; border-color: var(--accent-color); }
         #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; }
+                /* 【新增】图片按钮的样式 */
+        #image-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0 10px;
+            color: var(--secondary-text); /* 默认颜色 */
+            display: flex; /* 用于垂直居中SVG */
+            align-items: center; /* 用于垂直居中SVG */
+            transition: color 0.2s ease; /* 添加一个平滑的颜色过渡效果 */
+        }
+        #image-btn:hover {
+            color: var(--accent-color); /* 鼠标悬浮时，颜色变为主题色 */
+        }
+        #image-btn svg {
+            width: 24px; /* 设置图标宽度 */
+            height: 24px; /* 设置图标高度 */
+        }
+
+        /* 【新增】聊天消息中图片的样式 */
+        #messages img {
+            max-width: 100%; /* 确保图片不会超出气泡 */
+            border-radius: 10px; /* 给图片也加个小圆角 */
+            display: block;
+        }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.3s ease; }
         .overlay.visible { visibility: visible; opacity: 1; }
         .modal-box { background: var(--panel-bg); padding: 30px 40px; border-radius: 12px; text-align: center; }
@@ -190,7 +215,17 @@
     </div>
     <div id="main-chat">
         <ul id="messages"></ul>
-        <form id="form"><input id="input" autocomplete="off" placeholder="输入消息..." /><button>发送</button></form>
+                <form id="form">
+                        <button type="button" id="image-btn" title="发送图片">
+                <!-- 【新增】这是一个SVG图标，我们可以用CSS控制它的颜色 -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M21.586 10.414l-4.586-4.586A2 2 0 0 0 15.586 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V11.828a2 2 0 0 0-.414-1.414zM16 13a4 4 0 1 1 0-8a4 4 0 0 1 0 8zm-5-2a1 1 0 1 1 0-2a1 1 0 0 1 0 2z"/>
+                </svg>
+            </button>
+            <input type="file" id="image-input" accept="image/*" style="display: none;"> <!-- 隐藏的文件选择器 -->
+            <input id="input" autocomplete="off" placeholder="输入消息..." />
+            <button>发送</button>
+        </form>
     </div>
 </div>
 <button id="toggle-users" class="hidden">&#9776;</button>
@@ -239,6 +274,8 @@
     const catMascot = document.getElementById('cat-mascot');
     const catCanvas = document.getElementById('cat-canvas');
     const cakeCanvas = document.getElementById('cake-canvas');
+    const imageBtn = document.getElementById('image-btn');
+    const imageInput = document.getElementById('image-input');
 
     // --- 通用函数 ---
     function showOverlay(overlay) { hideOverlays(); overlay.classList.add('visible'); }
@@ -284,6 +321,30 @@
     pmForm.addEventListener('submit', e => { e.preventDefault(); const msg = pmInput.value.trim(); if (msg) { socket.emit('private message', { to: pmTargetUser, msg }); pmInput.value = ''; hideOverlays(); } });
     form.addEventListener('submit', e => { e.preventDefault(); const msg = input.value.trim(); if (msg) { socket.emit('chat message', msg); input.value = ''; } });
     toggleButton.addEventListener('click', () => body.classList.toggle('sidebar-open'));
+
+        imageBtn.addEventListener('click', () => {
+        imageInput.click(); // 点击按钮时，触发隐藏的文件选择器
+    });
+
+    imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // 简单的安全检查：限制图片大小 (例如 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('图片太大了！请选择小于 2MB 的图片。');
+            imageInput.value = ''; // 清空选择
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const base64Image = event.target.result;
+            socket.emit('chat image', base64Image);
+        };
+        reader.readAsDataURL(file); // 读取文件并转换为Base64
+        imageInput.value = ''; // 发送后清空，以便下次能选择同一张图片
+    });
 
     // --- Socket.IO 事件监听 ---
     // 【已修改】创建房间成功后，显示分享模态框
@@ -351,6 +412,8 @@
             renderLikes(container, likes, messageId);
         }
     });
+
+    socket.on('chat image', (data) => createMessageElement({ ...data, from: data.username }));
         // --- 【新增】网络状态处理 ---
     socket.on('disconnect', (reason) => {
         // 创建一个提示消息
@@ -384,7 +447,7 @@
         }
     });
 
-    // --- 消息与点赞渲染 ---
+        // --- 【已升级】消息与点赞渲染 (增加图片处理) ---
     function createMessageElement(data) {
         const shouldScroll = messages.scrollTop + messages.clientHeight >= messages.scrollHeight - 30;
         const li = document.createElement('li');
@@ -401,20 +464,29 @@
 
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
-            bubble.textContent = data.msg;
+            
+            // 【核心修改】判断消息类型
+            if (data.type === 'image') {
+                const img = document.createElement('img');
+                img.src = data.src;
+                bubble.appendChild(img); // 在气泡里放入图片
+            } else {
+                bubble.textContent = data.msg; // 普通消息放入文本
+            }
+            
+            if (data.type !== 'image') { // 图片消息不添加双击点赞，简化处理
+                bubble.addEventListener('dblclick', () => socket.emit('toggle like', data.id));
+            }
 
-            // 调整逻辑：先处理发送者信息
             if (data.type === 'private') {
                 li.classList.add('private-message');
                 sender.textContent = `[私信] ${data.from} 对 ${data.to}:`;
-                li.appendChild(sender); // 私信总是显示发送者
+                li.appendChild(sender);
             } else if (data.from !== myNickname) {
                 sender.textContent = data.from;
-                li.appendChild(sender); // 公开消息只显示别人的名字
+                li.appendChild(sender);
             }
-            bubble.className = 'message-bubble';
-            bubble.textContent = data.msg;
-            bubble.addEventListener('dblclick', () => socket.emit('toggle like', data.id));
+            
             li.appendChild(bubble);
 
             const likesContainer = document.createElement('div');
