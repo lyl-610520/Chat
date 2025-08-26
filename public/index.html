@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>EE鸦鸦 Chat Room</title>
+    <!-- 【最终修正】使用最标准的viewport标签，确保移动端正确适配 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +21,8 @@
         }
         html, body { height: 100%; margin: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; background-color: var(--bg-color); overflow: hidden; transition: background-color 0.5s ease; }
-        #chat-container, #welcome-container { display: flex; width: 100%; position: relative; z-index: 1; }
+        /* 【最终修正】采用纯CSS的Flexbox布局来处理高度，移除JS的height设置 */
+        #chat-container, #welcome-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; flex-direction: column; }
         .hidden { display: none !important; }
         #welcome-container { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         #welcome-container h1 { font-size: 2.5em; color: var(--text-color); }
@@ -45,27 +47,28 @@
         #user-list li { padding: 10px; border-radius: 12px; margin-bottom: 5px; }
         #user-list li.can-chat:hover { background-color: rgba(0,0,0,0.05); cursor: pointer; }
         #theme-switcher { margin-top: auto; padding-top: 20px; border: none; background: transparent; cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; color: var(--accent-color); }
-        #main-chat { flex-grow: 1; display: flex; flex-direction: column; height: 100%; }
+        /* 【最终修正】使用Flexbox进行布局，移除固定高度 */
+        #main-chat { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         #main-chat::before { content: '桐儿生日快乐'; position: absolute; top: 50%; left: 50%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: -1; opacity: 0; transition: opacity 0.8s ease; pointer-events:none; }
         body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
+        /* 【最终修正】让消息区域自动填充可用空间并独立滚动 */
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; display: flex; flex-direction: column; }
         #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: -moz-fit-content; width: fit-content; opacity: 0; animation: slideUp 0.4s forwards; }
+        /* 【最终修正】气泡的最终样式方案 */
         .message-bubble {
-            display: inline-block;
-            padding: 10px 14px;    /* 【优化】增加内边距，让气泡更饱满 */
-            font-size: 1.05em;     /* 【关键】将字体稍微放大，提升阅读舒适度 */
-            border-radius: 18px;
+            padding: 10px 15px;
+            font-size: 16px; /* 使用固定像素值保证移动端阅读体验 */
+            border-radius: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            word-break: break-all;
+            word-wrap: break-word; /* 采用更自然的换行方式 */
             text-align: left;
         }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-        /* 【已修正】恢复了生日主题下气泡的边框、阴影、相对定位和蝴蝶结样式 */
         body[data-theme='cat-theme'] .message-bubble {
             border: 2px solid #ffdae5;
             box-shadow: 0 4px 12px rgba(255, 133, 162, 0.15);
             position: relative;
-            padding: 12px 18px;
+            padding: 11px 17px;
         }
         body[data-theme='cat-theme'] .message-bubble::before,
         body[data-theme='cat-theme'] .message-bubble::after {
@@ -80,35 +83,14 @@
         .private-message .message-bubble { background-color: var(--private-msg-bg); border: 1px dashed var(--accent-color); color: var(--private-msg-text-color) !important; }
         li.system-message { align-self: center; font-style: italic; color: var(--secondary-text); }
         .message-sender { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; padding: 0 5px; color: var(--secondary-text); }
-        #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); }
+        #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); flex-shrink: 0; }
         #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 10px 18px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
         #input:focus { outline: none; border-color: var(--accent-color); }
         #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; }
-                /* 【新增】图片按钮的样式 */
-        #image-btn {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 0 10px;
-            color: var(--secondary-text); /* 默认颜色 */
-            display: flex; /* 用于垂直居中SVG */
-            align-items: center; /* 用于垂直居中SVG */
-            transition: color 0.2s ease; /* 添加一个平滑的颜色过渡效果 */
-        }
-        #image-btn:hover {
-            color: var(--accent-color); /* 鼠标悬浮时，颜色变为主题色 */
-        }
-        #image-btn svg {
-            width: 24px; /* 设置图标宽度 */
-            height: 24px; /* 设置图标高度 */
-        }
-
-        /* 【新增】聊天消息中图片的样式 */
-        #messages img {
-            max-width: 100%; /* 确保图片不会超出气泡 */
-            border-radius: 10px; /* 给图片也加个小圆角 */
-            display: block;
-        }
+        #image-btn { background: transparent; border: none; cursor: pointer; padding: 0 10px; color: var(--secondary-text); display: flex; align-items: center; transition: color 0.2s ease; }
+        #image-btn:hover { color: var(--accent-color); }
+        #image-btn svg { width: 24px; height: 24px; }
+        #messages img { max-width: 100%; border-radius: 10px; display: block; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.3s ease; }
         .overlay.visible { visibility: visible; opacity: 1; }
         .modal-box { background: var(--panel-bg); padding: 30px 40px; border-radius: 12px; text-align: center; }
@@ -121,17 +103,9 @@
         .likes-container { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; padding: 0 5px; max-width: 100%; }
         .like-heart { font-size: 0.8em; background-color: rgba(0, 0, 0, 0.05); padding: 2px 8px; border-radius: 10px; color: var(--secondary-text); }
         .like-heart.my-like { background-color: #ffe0e0; cursor: pointer; }
-        @media (max-width: 768px) { #sidebar { position: fixed; left:0; top:0; width:80%; max-width:300px; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease-in-out; } body.sidebar-open #sidebar { transform: translateX(0); } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size:20px; } }
-        @media (min-width: 769px) { #toggle-users { display: none; } }
-                /* 【新增】针对小屏幕的响应式布局优化 */
-        @media (max-width: 480px) {
-            #welcome-container .welcome-buttons {
-                display: flex;
-                flex-direction: column; /* 将按钮变为垂直排列 */
-                gap: 15px; /* 增加按钮间的垂直间距 */
-                width: 80%; /* 让按钮容器占一定宽度 */
-            }
-        }
+        @media (max-width: 768px) { #chat-container { flex-direction: column; } #sidebar { position: fixed; left:0; top:0; width:80%; max-width:300px; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease-in-out; } body.sidebar-open #sidebar { transform: translateX(0); } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size:20px; } }
+        @media (min-width: 769px) { #chat-container { flex-direction: row; } #toggle-users { display: none; } }
+        @media (max-width: 480px) { #welcome-container .welcome-buttons { display: flex; flex-direction: column; gap: 15px; width: 80%; } }
     </style>
 </head>
 <body>
@@ -163,7 +137,6 @@
     </div>
 </div>
 
-<!-- 【新增】创建成功后用于分享链接的模态框 -->
 <div id="share-room-overlay" class="overlay">
     <div class="modal-box">
         <h2>创建成功！</h2>
@@ -225,14 +198,13 @@
     </div>
     <div id="main-chat">
         <ul id="messages"></ul>
-                <form id="form">
-                        <button type="button" id="image-btn" title="发送图片">
-                <!-- 【新增】这是一个SVG图标，我们可以用CSS控制它的颜色 -->
+        <form id="form">
+            <button type="button" id="image-btn" title="发送图片">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M21.586 10.414l-4.586-4.586A2 2 0 0 0 15.586 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V11.828a2 2 0 0 0-.414-1.414zM16 13a4 4 0 1 1 0-8a4 4 0 0 1 0 8zm-5-2a1 1 0 1 1 0-2a1 1 0 0 1 0 2z"/>
                 </svg>
             </button>
-            <input type="file" id="image-input" accept="image/*" style="display: none;"> <!-- 隐藏的文件选择器 -->
+            <input type="file" id="image-input" accept="image/*" style="display: none;">
             <input id="input" autocomplete="off" placeholder="输入消息..." />
             <button>发送</button>
         </form>
@@ -290,19 +262,9 @@
     // --- 通用函数 ---
     function showOverlay(overlay) { hideOverlays(); overlay.classList.add('visible'); }
     function hideOverlays() { overlays.forEach(o => o.classList.remove('visible')); }
-        // 【新增】动态调整聊天容器高度以适配移动端浏览器
-    function adjustChatContainerHeight() {
-        if (chatContainer) {
-            chatContainer.style.height = `${window.innerHeight}px`;
-        }
-        if (welcomeContainer) {
-            welcomeContainer.style.height = `${window.innerHeight}px`;
-        }
-    }
 
     // --- 页面初始化与URL处理 ---
     document.addEventListener('DOMContentLoaded', () => {
-        adjustChatContainerHeight();
         const roomIdFromUrl = new URLSearchParams(window.location.search).get('room');
         if (roomIdFromUrl) {
             welcomeContainer.classList.add('hidden');
@@ -310,6 +272,15 @@
         }
         makeDraggable(catMascot);
         applyTheme(localStorage.getItem('chat_theme') || 'default');
+
+        const ua = navigator.userAgent.toLowerCase();
+        const isWebView = /micromessenger|weibo|qq|aweme|toutiao/.test(ua);
+        if (isWebView) {
+            const warningBanner = document.createElement('div');
+            warningBanner.innerHTML = '✨ 为获得最佳体验 (如发送图片)，建议点击右上角菜单，选择“在浏览器中打开”。';
+            warningBanner.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:var(--private-msg-bg); color:var(--private-msg-text-color); padding:8px; text-align:center; font-size:12px; z-index:9999; border-bottom:1px solid var(--border-color);';
+            body.prepend(warningBanner);
+        }
     });
 
     // --- 按钮与表单事件绑定 ---
@@ -342,18 +313,18 @@
     form.addEventListener('submit', e => { e.preventDefault(); const msg = input.value.trim(); if (msg) { socket.emit('chat message', msg); input.value = ''; } });
     toggleButton.addEventListener('click', () => body.classList.toggle('sidebar-open'));
 
-        imageBtn.addEventListener('click', () => {
-        imageInput.click(); // 点击按钮时，触发隐藏的文件选择器
+    imageBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        setTimeout(() => { imageInput.click(); }, 0);
     });
 
     imageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // 简单的安全检查：限制图片大小 (例如 2MB)
         if (file.size > 2 * 1024 * 1024) {
             alert('图片太大了！请选择小于 2MB 的图片。');
-            imageInput.value = ''; // 清空选择
+            imageInput.value = '';
             return;
         }
 
@@ -362,12 +333,11 @@
             const base64Image = event.target.result;
             socket.emit('chat image', base64Image);
         };
-        reader.readAsDataURL(file); // 读取文件并转换为Base64
-        imageInput.value = ''; // 发送后清空，以便下次能选择同一张图片
+        reader.readAsDataURL(file);
+        imageInput.value = '';
     });
 
     // --- Socket.IO 事件监听 ---
-    // 【已修改】创建房间成功后，显示分享模态框
     socket.on('room created', (roomId) => {
         roomLinkInput.value = `${location.origin}${location.pathname}?room=${roomId}`;
         showOverlay(shareRoomOverlay);
@@ -402,6 +372,7 @@
     
     socket.on('chat message', (data) => createMessageElement({ ...data, from: data.username, type: 'public' }));
     socket.on('private message', (data) => createMessageElement({ ...data, type: 'private' }));
+    socket.on('chat image', (data) => createMessageElement({ ...data, from: data.username }));
 
     socket.on('update user list', (users) => {
         userList.innerHTML = '';
@@ -433,27 +404,22 @@
         }
     });
 
-    socket.on('chat image', (data) => createMessageElement({ ...data, from: data.username }));
-        // --- 【新增】网络状态处理 ---
     socket.on('disconnect', (reason) => {
-        // 创建一个提示消息
         const item = document.createElement('li');
-        item.id = 'reconnecting-message'; // 给它一个ID，方便之后移除
+        item.id = 'reconnecting-message';
         item.className = 'system-message';
         item.textContent = '⚠️ 网络连接已断开，正在尝试重连...';
         messages.appendChild(item);
         messages.scrollTop = messages.scrollHeight;
 
-        // 禁用输入框
         input.disabled = true;
         form.querySelector('button').disabled = true;
     });
 
     socket.on('connect', () => {
-        // 如果页面中存在重连提示，说明是断线后重连成功的
         const reconnectingMsg = document.getElementById('reconnecting-message');
         if (reconnectingMsg) {
-            reconnectingMsg.remove(); // 移除“正在重连”的提示
+            reconnectingMsg.remove();
 
             const item = document.createElement('li');
             item.className = 'system-message';
@@ -461,13 +427,12 @@
             messages.appendChild(item);
             messages.scrollTop = messages.scrollHeight;
             
-            // 保持输入框禁用，强制用户刷新
             input.disabled = true;
             form.querySelector('button').disabled = true;
         }
     });
 
-        // --- 【已升级】消息与点赞渲染 (增加图片处理) ---
+    // --- 消息与点赞渲染 ---
     function createMessageElement(data) {
         const shouldScroll = messages.scrollTop + messages.clientHeight >= messages.scrollHeight - 30;
         const li = document.createElement('li');
@@ -485,16 +450,15 @@
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
             
-            // 【核心修改】判断消息类型
             if (data.type === 'image') {
                 const img = document.createElement('img');
                 img.src = data.src;
-                bubble.appendChild(img); // 在气泡里放入图片
+                bubble.appendChild(img);
             } else {
-                bubble.textContent = data.msg; // 普通消息放入文本
+                bubble.textContent = data.msg;
             }
             
-            if (data.type !== 'image') { // 图片消息不添加双击点赞，简化处理
+            if (data.type !== 'image') {
                 bubble.addEventListener('dblclick', () => socket.emit('toggle like', data.id));
             }
 
@@ -598,13 +562,11 @@
     }
 
     let eyesOpen = true;
-            // --- 【精装修版】绘制猫咪的函数 ---
     function drawCat(ctx) {
         const w = ctx.canvas.width / (window.devicePixelRatio || 1);
         const h = ctx.canvas.height / (window.devicePixelRatio || 1);
         ctx.clearRect(0, 0, w * 2, h * 2);
     
-        // --- 基础设置 ---
         const mainOutlineColor = '#5D4037';
         const faceColor = '#FFF8E1';
         const innerEarColor = '#FFCDD2';
@@ -615,21 +577,18 @@
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // --- 头部轮廓 (改为椭圆，更像猫脸) ---
         ctx.fillStyle = faceColor;
         const headCenterX = w / 2;
         const headCenterY = h * 0.55;
-        const headRadiusX = w * 0.42; // X轴半径，让脸更宽
-        const headRadiusY = w * 0.4;  // Y轴半径
+        const headRadiusX = w * 0.42;
+        const headRadiusY = w * 0.4;
         ctx.beginPath();
         ctx.ellipse(headCenterX, headCenterY, headRadiusX, headRadiusY, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // --- 耳朵 (保留精致版) ---
         const earBaseY = headCenterY - headRadiusY * 0.85;
         const earTipY = headCenterY - headRadiusY * 1.3;
-        // 左耳
         ctx.beginPath();
         ctx.moveTo(headCenterX - headRadiusX * 0.25, earBaseY);
         ctx.lineTo(headCenterX - headRadiusX * 0.5, earTipY);
@@ -638,7 +597,6 @@
         ctx.fillStyle = faceColor;
         ctx.fill();
         ctx.stroke();
-        // 右耳
         ctx.beginPath();
         ctx.moveTo(headCenterX + headRadiusX * 0.25, earBaseY);
         ctx.lineTo(headCenterX + headRadiusX * 0.5, earTipY);
@@ -646,7 +604,6 @@
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        // 内耳
         ctx.fillStyle = innerEarColor;
         ctx.beginPath();
         ctx.moveTo(headCenterX - headRadiusX * 0.3, earBaseY);
@@ -661,7 +618,6 @@
         ctx.closePath();
         ctx.fill();
 
-        // --- 【新增】腮红 ---
         ctx.fillStyle = blushColor;
         const blushRadius = w * 0.1;
         ctx.beginPath();
@@ -671,7 +627,6 @@
         ctx.arc(headCenterX + headRadiusX * 0.5, headCenterY + headRadiusY * 0.1, blushRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // --- 眼睛 ---
         ctx.fillStyle = mainOutlineColor;
         const eyeY = headCenterY - h * 0.05;
         if (eyesOpen) {
@@ -688,11 +643,9 @@
             ctx.stroke();
         }
         
-        // --- 【新增】胡须 ---
-        ctx.strokeStyle = '#BDBDBD'; // 灰色胡须
+        ctx.strokeStyle = '#BDBDBD';
         ctx.lineWidth = 2;
         const whiskerStartY = headCenterY + headRadiusY * 0.2;
-        // 左边胡须
         ctx.beginPath();
         ctx.moveTo(headCenterX - headRadiusX * 0.2, whiskerStartY);
         ctx.lineTo(headCenterX - headRadiusX * 0.7, whiskerStartY - h * 0.05);
@@ -701,7 +654,6 @@
         ctx.moveTo(headCenterX - headRadiusX * 0.2, whiskerStartY);
         ctx.lineTo(headCenterX - headRadiusX * 0.7, whiskerStartY + h * 0.05);
         ctx.stroke();
-        // 右边胡须
         ctx.beginPath();
         ctx.moveTo(headCenterX + headRadiusX * 0.2, whiskerStartY);
         ctx.lineTo(headCenterX + headRadiusX * 0.7, whiskerStartY - h * 0.05);
@@ -711,16 +663,13 @@
         ctx.lineTo(headCenterX + headRadiusX * 0.7, whiskerStartY + h * 0.05);
         ctx.stroke();
 
-        // --- 【优化】嘴巴 ---
         ctx.strokeStyle = mainOutlineColor;
         ctx.lineWidth = 3;
         const mouthY = headCenterY + headRadiusY * 0.15;
-        // 鼻子下面的线
         ctx.beginPath();
         ctx.moveTo(headCenterX, mouthY);
         ctx.lineTo(headCenterX, mouthY + h * 0.1);
         ctx.stroke();
-        // "w" 形微笑
         ctx.beginPath();
         ctx.arc(headCenterX - w * 0.1, mouthY + h * 0.1, w * 0.1, 0, Math.PI, false);
         ctx.stroke();
