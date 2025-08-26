@@ -86,7 +86,28 @@ io.on('connection', (socket) => {
         }
     }
   });
+  
+    // 【新增】处理图片消息
+  socket.on('chat image', (base64Image) => {
+    if (socket.username && socket.roomId) {
+      const room = rooms[socket.roomId];
+      if (room) {
+        const messageData = {
+          id: nanoid(8),
+          username: socket.username,
+          type: 'image', // 关键：消息类型为 image
+          src: base64Image, // 消息内容是Base64字符串
+          likes: []
+        };
 
+        if (!room.messages) room.messages = [];
+        room.messages.push(messageData);
+
+        io.to(socket.roomId).emit('chat image', messageData);
+      }
+    }
+  });
+  
   // 【新增】处理点赞/取消点赞逻辑
   socket.on('toggle like', (messageId) => {
     if (socket.username && socket.roomId) {
