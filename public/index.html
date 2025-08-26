@@ -20,7 +20,7 @@
         }
         html, body { height: 100%; margin: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; background-color: var(--bg-color); overflow: hidden; transition: background-color 0.5s ease; }
-        #chat-container, #welcome-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; }
+        #chat-container, #welcome-container { display: flex; width: 100%; position: relative; z-index: 1; }
         .hidden { display: none !important; }
         #welcome-container { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         #welcome-container h1 { font-size: 2.5em; color: var(--text-color); }
@@ -122,6 +122,15 @@
         .like-heart.my-like { background-color: #ffe0e0; cursor: pointer; }
         @media (max-width: 768px) { #sidebar { position: fixed; left:0; top:0; width:80%; max-width:300px; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease-in-out; } body.sidebar-open #sidebar { transform: translateX(0); } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size:20px; } }
         @media (min-width: 769px) { #toggle-users { display: none; } }
+                /* 【新增】针对小屏幕的响应式布局优化 */
+        @media (max-width: 480px) {
+            #welcome-container .welcome-buttons {
+                display: flex;
+                flex-direction: column; /* 将按钮变为垂直排列 */
+                gap: 15px; /* 增加按钮间的垂直间距 */
+                width: 80%; /* 让按钮容器占一定宽度 */
+            }
+        }
     </style>
 </head>
 <body>
@@ -280,9 +289,19 @@
     // --- 通用函数 ---
     function showOverlay(overlay) { hideOverlays(); overlay.classList.add('visible'); }
     function hideOverlays() { overlays.forEach(o => o.classList.remove('visible')); }
+        // 【新增】动态调整聊天容器高度以适配移动端浏览器
+    function adjustChatContainerHeight() {
+        if (chatContainer) {
+            chatContainer.style.height = `${window.innerHeight}px`;
+        }
+        if (welcomeContainer) {
+            welcomeContainer.style.height = `${window.innerHeight}px`;
+        }
+    }
 
     // --- 页面初始化与URL处理 ---
     document.addEventListener('DOMContentLoaded', () => {
+        adjustChatContainerHeight();
         const roomIdFromUrl = new URLSearchParams(window.location.search).get('room');
         if (roomIdFromUrl) {
             welcomeContainer.classList.add('hidden');
@@ -818,6 +837,8 @@
         const current = body.dataset.theme || 'default';
         applyTheme(current === 'cat-theme' ? 'default' : 'cat-theme');
     });
+        // 【新增】当窗口大小变化时 (例如手机横竖屏切换)，也重新调整高度
+    window.addEventListener('resize', adjustChatContainerHeight);
 </script>
 </body>
 </html>
