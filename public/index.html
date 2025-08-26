@@ -50,14 +50,22 @@
         body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; display: flex; flex-direction: column; }
         #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: -moz-fit-content; width: fit-content; opacity: 0; animation: slideUp 0.4s forwards; }
-        .message-bubble { padding: 12px 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); word-break: break-all; }
+                .message-bubble {
+            display: inline-block; /* 【关键】让元素宽度自适应内容 */
+            min-width: 20px;       /* 【关键】设置一个最小宽度，防止单个字符时过于窄小 */
+            padding: 12px 16px;    /* 微调了左右padding，更协调 */
+            border-radius: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            word-break: break-all;
+            text-align: left;      /* 确保文字总是从左边开始 */
+        }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
         /* 【已修正】恢复了生日主题下气泡的边框、阴影、相对定位和蝴蝶结样式 */
         body[data-theme='cat-theme'] .message-bubble {
             border: 2px solid #ffdae5;
             box-shadow: 0 4px 12px rgba(255, 133, 162, 0.15);
             position: relative;
-            padding: 15px 25px;
+            padding: 15px 20px;
         }
         body[data-theme='cat-theme'] .message-bubble::before,
         body[data-theme='cat-theme'] .message-bubble::after {
