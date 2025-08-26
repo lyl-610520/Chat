@@ -2,7 +2,8 @@
 <html>
 <head>
     <title>EE鸦鸦 Chat Room</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- 【最终方案】锁定缩放，提供稳定的 App 级体验 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
@@ -18,32 +19,25 @@
             --text-color: #4a4a4a; --secondary-text: #a88fb8; --border-color: #ffc2d4;
             --my-message-bg: #ffb9d4; --their-message-bg: #ffffff; --private-msg-bg: #f5f3ff;
         }
-        /* 【最终修正】让body本身不再滚动，为fixed布局做准备 */
+        
+        /* 【最终方案】让body本身不再滚动，为fixed布局做准备 */
         html, body { height: 100%; margin: 0; overflow: hidden; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: var(--bg-color); transition: background-color 0.5s ease; }
         
-        /* 【最终修正】使用 fixed 定位来创建不随键盘弹起而挤压的稳定布局 */
+        /* 【最终方案】使用 fixed 定位创建不随键盘弹起而挤压的稳定布局 */
         #chat-container, #welcome-container {
-            display: flex;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            flex-direction: column;
-            background-color: var(--bg-color);
+            display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; flex-direction: column; background-color: var(--bg-color);
         }
         body[data-theme='cat-theme'] #chat-container,
-        body[data-theme='cat-theme'] #welcome-container {
-             background-color: transparent; /* 主题模式下背景是body的，这里要透明 */
-        }
+        body[data-theme='cat-theme'] #welcome-container { background-color: transparent; }
         
         .hidden { display: none !important; }
         #welcome-container { justify-content: center; align-items: center; text-align: center; }
         #welcome-container h1 { font-size: 2.5em; color: var(--text-color); }
         #welcome-container p { font-size: 1.2em; color: var(--secondary-text); margin-bottom: 40px; }
         .welcome-buttons button { font-size: 1.2em; padding: 15px 30px; margin: 0 10px; border: none; border-radius: 8px; cursor: pointer; background-color: var(--accent-color); color: white; }
+        
         @keyframes fall { 0% { transform: translateY(-10vh); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
         #special-effects-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
         .flower { position: absolute; background-size: contain; background-repeat: no-repeat; background-image: url('https://api.iconify.design/emojione/fallen-leaf.svg?color=%23c4a484'); animation: fall linear infinite; }
@@ -56,6 +50,7 @@
         #cat-mascot:active { cursor: grabbing; transform: scale(1.1); }
         #cat-mascot.tapped { animation: cat-tap-animation 0.5s ease; }
         @keyframes cat-tap-animation { 0% { transform: scale(1.1); } 50% { transform: scale(0.9) rotate(5deg); } 100% { transform: scale(1.1) rotate(-5deg); } }
+        
         #sidebar { width: 280px; background-color: var(--panel-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; height: 100%; }
         #sidebar h2 { margin: 0 0 5px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
         #sidebar #room-name-display { font-size: 0.8em; color: var(--secondary-text); margin-bottom: 15px; }
@@ -63,29 +58,28 @@
         #user-list li { padding: 10px; border-radius: 12px; margin-bottom: 5px; }
         #user-list li.can-chat:hover { background-color: rgba(0,0,0,0.05); cursor: pointer; }
         #theme-switcher { margin-top: auto; padding-top: 20px; border: none; background: transparent; cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; color: var(--accent-color); }
+        
         #main-chat { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         #main-chat::before { content: '桐儿生日快乐'; position: absolute; top: 50%; left: 50%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: -1; opacity: 0; transition: opacity 0.8s ease; pointer-events:none; }
         body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; display: flex; flex-direction: column; }
         #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: -moz-fit-content; width: fit-content; opacity: 0; animation: slideUp 0.4s forwards; }
         
+        /* 【最终方案】气泡与字体美学优化 */
         .message-bubble {
-            padding: 12px 18px; 
-            font-size: 17px; 
-            border-radius: 22px; 
+            padding: 0.5rem 1rem;      /* 使用rem单位，并调整比例 */
+            font-size: 1rem;           /* 字体使用rem，尊重用户设置 */
+            line-height: 1.5;          /* 增加行高，提升阅读舒适度 */
+            border-radius: 1.25rem;    /* 配合调整圆角 */
             box-shadow: 0 2px 4px rgba(0,0,0,0.08);
             text-align: left;
-            overflow-wrap: break-word; /* 现代浏览器推荐的写法 */
-            /* 【最终修正】增强包裹性的关键属性 */
-            word-break: break-all;
+            overflow-wrap: break-word; /* 智能换行，保持单词完整性 */
         }
 
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
         body[data-theme='cat-theme'] .message-bubble {
-            border: 2px solid #ffdae5;
-            box-shadow: 0 4px 12px rgba(255, 133, 162, 0.15);
-            position: relative;
-            padding: 13px 19px;
+            border: 2px solid #ffdae5; box-shadow: 0 4px 12px rgba(255, 133, 162, 0.15);
+            position: relative; padding: calc(0.5rem + 2px) calc(1rem + 2px);
         }
         body[data-theme='cat-theme'] .message-bubble::before,
         body[data-theme='cat-theme'] .message-bubble::after {
@@ -93,6 +87,7 @@
         }
         body[data-theme='cat-theme'] .message-bubble::before { top: -10px; left: 15px; transform: rotate(-20deg); }
         body[data-theme='cat-theme'] .message-bubble::after { bottom: -12px; right: 15px; transform: rotate(15deg); }
+        
         li.my-message { align-self: flex-end; align-items: flex-end; }
         li.their-message { align-self: flex-start; align-items: flex-start; }
         .my-message .message-bubble { background: var(--my-message-bg); color: #fff; }
@@ -100,13 +95,35 @@
         .private-message .message-bubble { background-color: var(--private-msg-bg); border: 1px dashed var(--accent-color); color: var(--private-msg-text-color) !important; }
         li.system-message { align-self: center; font-style: italic; color: var(--secondary-text); }
         .message-sender { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; padding: 0 5px; color: var(--secondary-text); }
-        #form { display: flex; padding: 15px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); flex-shrink: 0; }
-        #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 12px 20px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
+        
+        /* 【最终方案】输入栏 Flexbox 布局 */
+        #form { display: flex; align-items: center; padding: 10px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); flex-shrink: 0; gap: 10px; }
+        
+        /* 【最终方案】让输入框可被无限压缩，这是解决挤压的关键 */
+        #input { 
+            flex-grow: 1; /* 占据剩余空间 */
+            min-width: 0; /* 允许被无限压缩！ */
+            border: 1px solid var(--border-color); background-color: var(--their-message-bg);
+            padding: 10px 18px; border-radius: 30px; font-size: 1rem; color: var(--text-color);
+        }
         #input:focus { outline: none; border-color: var(--accent-color); }
-        #form button { background: var(--accent-color); border: none; padding: 12px 22px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; }
-        #image-btn { background: transparent; border: none; cursor: pointer; padding: 0 10px; color: var(--secondary-text); display: flex; align-items: center; transition: color 0.2s ease; }
+        
+        /* 【最终方案】让按钮宽度固定，不被压缩 */
+        #image-btn, #send-btn {
+            flex-shrink: 0; /* 禁止压缩！ */
+            display: flex; align-items: center; justify-content: center;
+            border: none; cursor: pointer; transition: all 0.2s ease;
+        }
+        #image-btn { background: transparent; color: var(--secondary-text); padding: 8px; }
         #image-btn:hover { color: var(--accent-color); }
         #image-btn svg { width: 24px; height: 24px; }
+        
+        #send-btn {
+            background: var(--accent-color); color: white; border-radius: 25px;
+            font-size: 1rem; font-weight: bold; padding: 10px 20px;
+        }
+        .send-icon { display: none; width: 22px; height: 22px; } /* 默认隐藏图标 */
+        
         #messages img { max-width: 100%; border-radius: 10px; display: block; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.3s ease; }
         .overlay.visible { visibility: visible; opacity: 1; }
@@ -120,9 +137,21 @@
         .likes-container { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; padding: 0 5px; max-width: 100%; }
         .like-heart { font-size: 0.8em; background-color: rgba(0, 0, 0, 0.05); padding: 2px 8px; border-radius: 10px; color: var(--secondary-text); }
         .like-heart.my-like { background-color: #ffe0e0; cursor: pointer; }
+        
         @media (max-width: 768px) { #chat-container { flex-direction: column; } #sidebar { position: fixed; left:0; top:0; width:80%; max-width:300px; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease-in-out; } body.sidebar-open #sidebar { transform: translateX(0); } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size:20px; } }
         @media (min-width: 769px) { #chat-container { flex-direction: row; } #toggle-users { display: none; } }
-        @media (max-width: 480px) { #welcome-container .welcome-buttons { display: flex; flex-direction: column; gap: 15px; width: 80%; } #form { padding: 10px; } }
+        
+        /* 【最终方案】针对超小屏幕的响应式美化 */
+        @media (max-width: 400px) {
+            #send-btn {
+                padding: 0; /* 移除内边距 */
+                width: 44px;  /* 固定宽度 */
+                height: 44px; /* 固定高度，形成圆形 */
+                border-radius: 50%;
+            }
+            .send-text { display: none; }   /* 隐藏文字 */
+            .send-icon { display: block; }  /* 显示图标 */
+        }
     </style>
 </head>
 <body>
@@ -140,6 +169,7 @@
     </div>
 </div>
 
+<!-- 所有弹窗浮层部分保持不变 -->
 <div id="create-room-overlay" class="overlay">
     <div class="modal-box">
         <h2>创建新房间</h2>
@@ -153,7 +183,6 @@
         </form>
     </div>
 </div>
-
 <div id="share-room-overlay" class="overlay">
     <div class="modal-box">
         <h2>创建成功！</h2>
@@ -165,7 +194,6 @@
         </div>
     </div>
 </div>
-
 <div id="join-room-overlay" class="overlay">
     <div class="modal-box">
         <h2>加入房间</h2>
@@ -178,7 +206,6 @@
         </form>
     </div>
 </div>
-
 <div id="login-overlay" class="overlay">
     <div class="modal-box">
         <h2 id="login-room-name">加入房间</h2>
@@ -192,7 +219,6 @@
         </form>
     </div>
 </div>
-
 <div id="pm-overlay" class="overlay">
     <div class="modal-box">
         <h2 id="pm-title">发送私信</h2>
@@ -223,7 +249,13 @@
             </button>
             <input type="file" id="image-input" accept="image/*" style="display: none;">
             <input id="input" autocomplete="off" placeholder="输入消息..." />
-            <button>发送</button>
+            <!-- 【最终方案】修改发送按钮结构，以支持响应式切换 -->
+            <button type="submit" id="send-btn">
+                <span class="send-text">发送</span>
+                <svg class="send-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
         </form>
     </div>
 </div>
