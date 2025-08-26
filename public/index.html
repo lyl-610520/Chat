@@ -2,8 +2,8 @@
 <html>
 <head>
     <title>EE鸦鸦 Chat Room</title>
-    <!-- 【最终修正】使用最标准的viewport标签，确保移动端正确适配 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 【修改】移除对缩放的限制，增强移动端浏览器的兼容性和可访问性 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
             --bg-color: #f0f2f5; --panel-bg: #ffffff; --accent-color: #5dade2; --text-color: #0d0d0d;
             --secondary-text: #65676b; --border-color: #ced0d4; --my-message-bg: #5dade2;
             --their-message-bg: #e4e6eb; --private-msg-bg: #fffbe6; --private-msg-text-color: #333;
-            --display-font: 'ZCOOL KuaiLe', cursive;
+            --display-font: 'ZCOOL+KuaiLe', cursive;
         }
         body[data-theme='cat-theme'] {
             --bg-color: #fdf2f6; --panel-bg: rgba(255, 255, 255, 0.85); --accent-color: #ff85a2;
@@ -20,8 +20,8 @@
             --my-message-bg: #ffb9d4; --their-message-bg: #ffffff; --private-msg-bg: #f5f3ff;
         }
         html, body { height: 100%; margin: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; background-color: var(--bg-color); overflow: hidden; transition: background-color 0.5s ease; }
-        /* 【最终修正】采用纯CSS的Flexbox布局来处理高度，移除JS的height设置 */
+        /* 【修改】移除 overflow: hidden，让页面在移动端表现更自然 */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; background-color: var(--bg-color); transition: background-color 0.5s ease; }
         #chat-container, #welcome-container { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; flex-direction: column; }
         .hidden { display: none !important; }
         #welcome-container { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
@@ -47,28 +47,28 @@
         #user-list li { padding: 10px; border-radius: 12px; margin-bottom: 5px; }
         #user-list li.can-chat:hover { background-color: rgba(0,0,0,0.05); cursor: pointer; }
         #theme-switcher { margin-top: auto; padding-top: 20px; border: none; background: transparent; cursor: pointer; font-weight: bold; text-align: center; font-size: 1.1em; color: var(--accent-color); }
-        /* 【最终修正】使用Flexbox进行布局，移除固定高度 */
         #main-chat { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         #main-chat::before { content: '桐儿生日快乐'; position: absolute; top: 50%; left: 50%; text-align: center; font-family: var(--display-font); font-size: 12vw; color: rgba(255, 192, 203, 0.2); transform: translate(-50%, -50%) rotate(-8deg); z-index: -1; opacity: 0; transition: opacity 0.8s ease; pointer-events:none; }
         body[data-theme='cat-theme'] #main-chat::before { opacity: 1; }
-        /* 【最终修正】让消息区域自动填充可用空间并独立滚动 */
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style-type: none; margin: 0; display: flex; flex-direction: column; }
         #messages li { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 75%; width: -moz-fit-content; width: fit-content; opacity: 0; animation: slideUp 0.4s forwards; }
-        /* 【最终修正】气泡的最终样式方案 */
+        
+        /* 【修改】调整气泡样式，增大字体和内边距，优化视觉效果 */
         .message-bubble {
-            padding: 10px 15px;
-            font-size: 16px; /* 使用固定像素值保证移动端阅读体验 */
-            border-radius: 20px;
+            padding: 12px 18px; /* 增大内边距 */
+            font-size: 17px; /* 增大字体 */
+            border-radius: 22px; /* 相应增大圆角 */
             box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            word-wrap: break-word; /* 采用更自然的换行方式 */
+            word-wrap: break-word;
             text-align: left;
         }
+
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
         body[data-theme='cat-theme'] .message-bubble {
             border: 2px solid #ffdae5;
             box-shadow: 0 4px 12px rgba(255, 133, 162, 0.15);
             position: relative;
-            padding: 11px 17px;
+            padding: 13px 19px;
         }
         body[data-theme='cat-theme'] .message-bubble::before,
         body[data-theme='cat-theme'] .message-bubble::after {
@@ -83,10 +83,10 @@
         .private-message .message-bubble { background-color: var(--private-msg-bg); border: 1px dashed var(--accent-color); color: var(--private-msg-text-color) !important; }
         li.system-message { align-self: center; font-style: italic; color: var(--secondary-text); }
         .message-sender { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; padding: 0 5px; color: var(--secondary-text); }
-        #form { display: flex; padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--panel-bg); flex-shrink: 0; }
-        #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 10px 18px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
+        #form { display: flex; padding: 15px; /* 在移动端稍微减小上下padding */ border-top: 1px solid var(--border-color); background-color: var(--panel-bg); flex-shrink: 0; }
+        #input { border: 1px solid var(--border-color); background-color: var(--their-message-bg); padding: 12px 20px; flex-grow: 1; border-radius: 30px; margin-right: 10px; font-size: 1em; color: var(--text-color); }
         #input:focus { outline: none; border-color: var(--accent-color); }
-        #form button { background: var(--accent-color); border: none; padding: 10px 20px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; }
+        #form button { background: var(--accent-color); border: none; padding: 12px 22px; color: white; border-radius: 30px; cursor: pointer; font-size: 1em; }
         #image-btn { background: transparent; border: none; cursor: pointer; padding: 0 10px; color: var(--secondary-text); display: flex; align-items: center; transition: color 0.2s ease; }
         #image-btn:hover { color: var(--accent-color); }
         #image-btn svg { width: 24px; height: 24px; }
@@ -105,7 +105,7 @@
         .like-heart.my-like { background-color: #ffe0e0; cursor: pointer; }
         @media (max-width: 768px) { #chat-container { flex-direction: column; } #sidebar { position: fixed; left:0; top:0; width:80%; max-width:300px; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease-in-out; } body.sidebar-open #sidebar { transform: translateX(0); } #toggle-users { display: block; position: fixed; top: 15px; left: 15px; z-index: 20; background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size:20px; } }
         @media (min-width: 769px) { #chat-container { flex-direction: row; } #toggle-users { display: none; } }
-        @media (max-width: 480px) { #welcome-container .welcome-buttons { display: flex; flex-direction: column; gap: 15px; width: 80%; } }
+        @media (max-width: 480px) { #welcome-container .welcome-buttons { display: flex; flex-direction: column; gap: 15px; width: 80%; } #form { padding: 10px; } /* 进一步减小超小屏幕的padding */ }
     </style>
 </head>
 <body>
@@ -211,7 +211,6 @@
     </div>
 </div>
 <button id="toggle-users" class="hidden">&#9776;</button>
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
     const socket = io();
@@ -277,9 +276,16 @@
         const isWebView = /micromessenger|weibo|qq|aweme|toutiao/.test(ua);
         if (isWebView) {
             const warningBanner = document.createElement('div');
-            warningBanner.innerHTML = '✨ 为获得最佳体验 (如发送图片)，建议点击右上角菜单，选择“在浏览器中打开”。';
-            warningBanner.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:var(--private-msg-bg); color:var(--private-msg-text-color); padding:8px; text-align:center; font-size:12px; z-index:9999; border-bottom:1px solid var(--border-color);';
+            // 【修改】添加一个关闭按钮，并为内容和按钮设置简单的内联样式
+            warningBanner.innerHTML = `<span style="flex-grow:1;">✨ 为获得最佳体验 (如发送图片)，建议点击右上角菜单，选择“在浏览器中打开”。</span><span id="close-banner-btn" style="font-size:20px; cursor:pointer; padding: 0 10px; line-height:1;">&times;</span>`;
+            // 【修改】使用flex布局让关闭按钮能垂直居中
+            warningBanner.style.cssText = 'position:fixed; top:0; left:0; width:100%; box-sizing:border-box; background:var(--private-msg-bg); color:var(--private-msg-text-color); padding:8px; text-align:center; font-size:12px; z-index:9999; border-bottom:1px solid var(--border-color); display:flex; align-items:center;';
             body.prepend(warningBanner);
+
+            // 【新增】为关闭按钮添加点击事件
+            warningBanner.querySelector('#close-banner-btn').addEventListener('click', () => {
+                warningBanner.style.display = 'none';
+            });
         }
     });
 
@@ -431,8 +437,7 @@
             form.querySelector('button').disabled = true;
         }
     });
-
-    // --- 消息与点赞渲染 ---
+        // --- 消息与点赞渲染 ---
     function createMessageElement(data) {
         const shouldScroll = messages.scrollTop + messages.clientHeight >= messages.scrollHeight - 30;
         const li = document.createElement('li');
@@ -787,8 +792,17 @@
         const current = body.dataset.theme || 'default';
         applyTheme(current === 'cat-theme' ? 'default' : 'cat-theme');
     });
-        // 【新增】当窗口大小变化时 (例如手机横竖屏切换)，也重新调整高度
-    window.addEventListener('resize', adjustChatContainerHeight);
+    
+    // 【修改】移除了对 adjustChatContainerHeight 的调用，因为纯CSS方案更优
+    window.addEventListener('resize', () => {
+        // 你可以把需要在窗口大小变化时执行的逻辑放在这里，例如重新绘制Canvas
+        if (body.dataset.theme === 'cat-theme') {
+            const catCtx = setupCanvas(catCanvas);
+            drawCat(catCtx);
+            const cakeCtx = setupCanvas(cakeCanvas);
+            drawCake(cakeCtx);
+        }
+    });
 </script>
 </body>
 </html>
