@@ -499,94 +499,134 @@
     }
 
     let eyesOpen = true;
-        // --- 【全新修正】绘制猫咪的函数 ---
+            // --- 【精装修版】绘制猫咪的函数 ---
     function drawCat(ctx) {
         const w = ctx.canvas.width / (window.devicePixelRatio || 1);
         const h = ctx.canvas.height / (window.devicePixelRatio || 1);
         ctx.clearRect(0, 0, w * 2, h * 2);
     
-        ctx.strokeStyle = '#5D4037'; // 猫咪轮廓颜色
+        // --- 基础设置 ---
+        const mainOutlineColor = '#5D4037';
+        const faceColor = '#FFF8E1';
+        const innerEarColor = '#FFCDD2';
+        const blushColor = 'rgba(255, 192, 203, 0.6)';
+
+        ctx.strokeStyle = mainOutlineColor;
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // --- 头部 ---
-        ctx.fillStyle = '#FFF8E1'; // 猫咪脸部颜色
+        // --- 头部轮廓 (改为椭圆，更像猫脸) ---
+        ctx.fillStyle = faceColor;
         const headCenterX = w / 2;
         const headCenterY = h * 0.55;
-        const headRadius = w * 0.4;
+        const headRadiusX = w * 0.42; // X轴半径，让脸更宽
+        const headRadiusY = w * 0.4;  // Y轴半径
         ctx.beginPath();
-        ctx.arc(headCenterX, headCenterY, headRadius, 0, Math.PI * 2);
+        ctx.ellipse(headCenterX, headCenterY, headRadiusX, headRadiusY, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // --- 耳朵 (使用更精确和对称的坐标) ---
-        
-        // 左耳外轮廓
+        // --- 耳朵 (保留精致版) ---
+        const earBaseY = headCenterY - headRadiusY * 0.85;
+        const earTipY = headCenterY - headRadiusY * 1.3;
+        // 左耳
         ctx.beginPath();
-        ctx.moveTo(headCenterX - headRadius * 0.25, headCenterY - headRadius * 0.85); // 内侧点 (靠近中心)
-        ctx.lineTo(headCenterX - headRadius * 0.5, headCenterY - headRadius * 1.3);  // 顶点 (最高点)
-        ctx.lineTo(headCenterX - headRadius * 0.75, headCenterY - headRadius * 0.75); // 外侧点 (远离中心)
+        ctx.moveTo(headCenterX - headRadiusX * 0.25, earBaseY);
+        ctx.lineTo(headCenterX - headRadiusX * 0.5, earTipY);
+        ctx.lineTo(headCenterX - headRadiusX * 0.75, earBaseY + headRadiusY * 0.1);
         ctx.closePath();
-        ctx.fillStyle = '#FFF8E1'; // 和脸一个颜色
+        ctx.fillStyle = faceColor;
         ctx.fill();
         ctx.stroke();
-        
-        // 右耳外轮廓 (与左耳X轴对称)
+        // 右耳
         ctx.beginPath();
-        ctx.moveTo(headCenterX + headRadius * 0.25, headCenterY - headRadius * 0.85); // 内侧点
-        ctx.lineTo(headCenterX + headRadius * 0.5, headCenterY - headRadius * 1.3);  // 顶点
-        ctx.lineTo(headCenterX + headRadius * 0.75, headCenterY - headRadius * 0.75); // 外侧点
+        ctx.moveTo(headCenterX + headRadiusX * 0.25, earBaseY);
+        ctx.lineTo(headCenterX + headRadiusX * 0.5, earTipY);
+        ctx.lineTo(headCenterX + headRadiusX * 0.75, earBaseY + headRadiusY * 0.1);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-
-        // 左耳内粉色
+        // 内耳
+        ctx.fillStyle = innerEarColor;
         ctx.beginPath();
-        ctx.moveTo(headCenterX - headRadius * 0.3, headCenterY - headRadius * 0.8);
-        ctx.lineTo(headCenterX - headRadius * 0.48, headCenterY - headRadius * 1.15);
-        ctx.lineTo(headCenterX - headRadius * 0.65, headCenterY - headRadius * 0.75);
+        ctx.moveTo(headCenterX - headRadiusX * 0.3, earBaseY);
+        ctx.lineTo(headCenterX - headRadiusX * 0.48, earTipY + headRadiusY * 0.15);
+        ctx.lineTo(headCenterX - headRadiusX * 0.65, earBaseY + headRadiusY * 0.05);
         ctx.closePath();
-        ctx.fillStyle = '#FFCDD2'; // 粉色
         ctx.fill();
-
-        // 右耳内粉色
         ctx.beginPath();
-        ctx.moveTo(headCenterX + headRadius * 0.3, headCenterY - headRadius * 0.8);
-        ctx.lineTo(headCenterX + headRadius * 0.48, headCenterY - headRadius * 1.15);
-        ctx.lineTo(headCenterX + headRadius * 0.65, headCenterY - headRadius * 0.75);
+        ctx.moveTo(headCenterX + headRadiusX * 0.3, earBaseY);
+        ctx.lineTo(headCenterX + headRadiusX * 0.48, earTipY + headRadiusY * 0.15);
+        ctx.lineTo(headCenterX + headRadiusX * 0.65, earBaseY + headRadiusY * 0.05);
         ctx.closePath();
         ctx.fill();
 
+        // --- 【新增】腮红 ---
+        ctx.fillStyle = blushColor;
+        const blushRadius = w * 0.1;
+        ctx.beginPath();
+        ctx.arc(headCenterX - headRadiusX * 0.5, headCenterY + headRadiusY * 0.1, blushRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(headCenterX + headRadiusX * 0.5, headCenterY + headRadiusY * 0.1, blushRadius, 0, Math.PI * 2);
+        ctx.fill();
 
         // --- 眼睛 ---
-        ctx.fillStyle = '#5D4037'; // 眼睛颜色
+        ctx.fillStyle = mainOutlineColor;
         const eyeY = headCenterY - h * 0.05;
         if (eyesOpen) {
             ctx.beginPath();
-            ctx.arc(w * 0.35, eyeY, w * 0.07, 0, Math.PI * 2); // 左眼
-            ctx.arc(w * 0.65, eyeY, w * 0.07, 0, Math.PI * 2); // 右眼
+            ctx.arc(headCenterX - headRadiusX * 0.4, eyeY, w * 0.07, 0, Math.PI * 2);
+            ctx.arc(headCenterX + headRadiusX * 0.4, eyeY, w * 0.07, 0, Math.PI * 2);
             ctx.fill();
-        } else { // 眨眼
+        } else {
             ctx.beginPath();
-            ctx.moveTo(w * 0.3, eyeY);
-            ctx.lineTo(w * 0.4, eyeY);
-            ctx.moveTo(w * 0.6, eyeY);
-            ctx.lineTo(w * 0.7, eyeY);
+            ctx.moveTo(headCenterX - headRadiusX * 0.5, eyeY);
+            ctx.lineTo(headCenterX - headRadiusX * 0.3, eyeY);
+            ctx.moveTo(headCenterX + headRadiusX * 0.3, eyeY);
+            ctx.lineTo(headCenterX + headRadiusX * 0.5, eyeY);
             ctx.stroke();
         }
-
-        // --- 嘴巴 ---
-        const mouthY = headCenterY + h * 0.08;
+        
+        // --- 【新增】胡须 ---
+        ctx.strokeStyle = '#BDBDBD'; // 灰色胡须
+        ctx.lineWidth = 2;
+        const whiskerStartY = headCenterY + headRadiusY * 0.2;
+        // 左边胡须
         ctx.beginPath();
-        ctx.moveTo(w * 0.45, mouthY);
-        ctx.lineTo(w * 0.55, mouthY);
-        ctx.moveTo(w * 0.5, mouthY);
-        ctx.lineTo(w * 0.5, mouthY + h * 0.05);
+        ctx.moveTo(headCenterX - headRadiusX * 0.2, whiskerStartY);
+        ctx.lineTo(headCenterX - headRadiusX * 0.7, whiskerStartY - h * 0.05);
+        ctx.moveTo(headCenterX - headRadiusX * 0.2, whiskerStartY);
+        ctx.lineTo(headCenterX - headRadiusX * 0.7, whiskerStartY);
+        ctx.moveTo(headCenterX - headRadiusX * 0.2, whiskerStartY);
+        ctx.lineTo(headCenterX - headRadiusX * 0.7, whiskerStartY + h * 0.05);
+        ctx.stroke();
+        // 右边胡须
+        ctx.beginPath();
+        ctx.moveTo(headCenterX + headRadiusX * 0.2, whiskerStartY);
+        ctx.lineTo(headCenterX + headRadiusX * 0.7, whiskerStartY - h * 0.05);
+        ctx.moveTo(headCenterX + headRadiusX * 0.2, whiskerStartY);
+        ctx.lineTo(headCenterX + headRadiusX * 0.7, whiskerStartY);
+        ctx.moveTo(headCenterX + headRadiusX * 0.2, whiskerStartY);
+        ctx.lineTo(headCenterX + headRadiusX * 0.7, whiskerStartY + h * 0.05);
         ctx.stroke();
 
+        // --- 【优化】嘴巴 ---
+        ctx.strokeStyle = mainOutlineColor;
+        ctx.lineWidth = 3;
+        const mouthY = headCenterY + headRadiusY * 0.15;
+        // 鼻子下面的线
         ctx.beginPath();
-        ctx.arc(w * 0.5, mouthY + h * 0.05, w * 0.15, 0.2 * Math.PI, 0.8 * Math.PI);
+        ctx.moveTo(headCenterX, mouthY);
+        ctx.lineTo(headCenterX, mouthY + h * 0.1);
+        ctx.stroke();
+        // "w" 形微笑
+        ctx.beginPath();
+        ctx.arc(headCenterX - w * 0.1, mouthY + h * 0.1, w * 0.1, 0, Math.PI, false);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(headCenterX + w * 0.1, mouthY + h * 0.1, w * 0.1, 0, Math.PI, false);
         ctx.stroke();
     }
     
